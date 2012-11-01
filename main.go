@@ -57,18 +57,14 @@ func main() {
 	}
 
 	sdl.WM_SetCaption("Lecture Hall Games 0.1", "")
+	sdl.EnableUNICODE(1)
 
-	var screen = sdl.SetVideoMode(800, 600, 32, sdl.RESIZABLE)
-
+	screen := sdl.SetVideoMode(800, 600, 32, sdl.RESIZABLE)
 	if screen == nil {
 		log.Fatal(sdl.GetError())
 	}
 
 	rand.Seed(time.Now().UnixNano())
-
-	sdl.EnableUNICODE(1)
-
-	ticker := time.NewTicker(time.Second / 50)
 
 	go func() {
 		ln, err := net.Listen("tcp", ":8080")
@@ -87,40 +83,30 @@ func main() {
 		}
 	}()
 
-	go func() {
-		for {
-			select {
-			case <-ticker.C:
-				screen.FillRect(nil, 0x302019)
-			loop:
-				for {
-					select {
-					default:
-						break loop
-					}
-				}
-				screen.Flip()
-			}
-		}
-	}()
-
 	running := true
+	last := time.Now()
 	for running {
+
+		// process events
 		select {
-		case _event := <-sdl.Events:
-			switch e := _event.(type) {
+		case event := <-sdl.Events:
+			switch e := event.(type) {
 			case sdl.QuitEvent:
 				running = false
 			case sdl.ResizeEvent:
-				screen = sdl.SetVideoMode(int(e.W), int(e.H), 32,
-					sdl.RESIZABLE)
-
-				if screen == nil {
-					log.Fatal(sdl.GetError())
-				}
-			case sdl.KeyboardEvent:
+				screen = sdl.SetVideoMode(int(e.W), int(e.H), 32, sdl.RESIZABLE)
 			}
+		default:
 		}
+
+		// move objects
+		current := time.Now()
+		t := current.Sub(last)
+		last = current
+		fmt.Println(t)
+
+		// render screen
+		screen.FillRect(nil, 0x302019)
 	}
 
 	sdl.Quit()
