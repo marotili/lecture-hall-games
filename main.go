@@ -130,6 +130,7 @@ func main() {
 
 	width := 16
 	sprite = NewSprite("artwork/auto.png", width, width*3)
+	background := NewSprite("artwork/background.png", 800, 600)
 
 	for running {
 		// move objects
@@ -161,6 +162,8 @@ func main() {
 
 		racer.Update(t)
 		racer.Render()
+
+		background.Draw(400, 300, 0, 1)
 
 		sdl.GL_SwapBuffers()
 	}
