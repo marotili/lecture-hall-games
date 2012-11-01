@@ -1,0 +1,37 @@
+Proposal: Docs & names for game assets
+======================================
+
+
+This directory holds two subdirectories:
+* levels (with one subdirectory per level)
+* cars (with one subdirectory per car)
+
+Each level is defined by 
+* one json-file (level.json)
+* one subdirectory for source files e.g. blend files (this directory can be ignored)
+* 4 level images (background.png, foreground.png, z.png and drivable.png)
+	* background.png is used as background layer to display the level for the user
+	  (only visual)
+	* foreground is used above the background layer 
+	  (only visual)
+	* z.png provides a hight map of the level which can be used to scale the cars
+	  (not displayed, but used for game logic)
+	  (black=low, white=high) 
+	* drivable.png provides the area for movement for the cars.
+	  (white = full speed is possible, black = only very slow movement is possible)
+
+Cars drive between background and foreground layer of the levels.
+
+
+Each car is defined by
+* one json-file (car.json)
+* one subdirectory for source files e.g. blend files (this directory can be ignored)
+* two png files (fixed-color.png, playercolor.png) that together show the car
+  if both are displayed (playercolor.png over fixed-color.png), the car is ready.
+	* fixed-color.png is a sprite that can be displayed without changes
+	* playercolor is a sprite that can be customized for different player colors
+
+
+The default size of levels is 1600x1200  (can be re-defined in level.json)
+The default size of levels is 64x32  (can be re-defined in level.json)
+
