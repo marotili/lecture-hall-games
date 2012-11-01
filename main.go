@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/0xe2-0x9a-0x9b/Go-SDL/sdl"
+	"github.com/0xe2-0x9a-0x9b/Go-SDL/mixer"
 	"github.com/banthar/gl"
 	"io"
 	"log"
@@ -132,6 +133,19 @@ func main() {
 	sprite = NewSprite("artwork/auto.png", width, width*3)
 	background := NewSprite("artwork/background.png", 800, 600)
 
+    if mixer.OpenAudio(mixer.DEFAULT_FREQUENCY, mixer.DEFAULT_FORMAT,
+        mixer.DEFAULT_CHANNELS, 4096) != 0 {
+            log.Fatal(sdl.GetError())
+        }
+
+    music := mixer.LoadMUS("artwork/music.ogg")
+
+    if music == nil {
+        log.Fatal(sdl.GetError())
+    }
+
+    music.PlayMusic(-1)
+
 	for running {
 		// move objects
 		current := time.Now()
@@ -167,6 +181,8 @@ func main() {
 
 		sdl.GL_SwapBuffers()
 	}
+
+    music.Free()
 
 	sdl.Quit()
 }
