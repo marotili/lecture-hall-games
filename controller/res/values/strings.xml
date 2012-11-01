@@ -1,0 +1,9 @@
+<resources>
+
+    <string name="app_name">LectureRoomGamesController</string>
+    <string name="server">Server:</string>
+    <string name="nickname">Nickname</string>
+    <string name="toController">Connect</string>
+    <string name="title_activity_controller_main">Controller</string>
+
+</resources>
