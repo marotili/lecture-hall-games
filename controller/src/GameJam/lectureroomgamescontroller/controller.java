@@ -67,8 +67,6 @@ public class controller extends Activity {
 					outStream.writeInt(0);
 					System.out.println("X: "  + x.toString());
 					System.out.println("Y: "  + y.toString());
-					int size = event.getHistorySize();
-					event.getHistoricalX(0);
 				} catch (IOException e) {
 
 					e.printStackTrace();

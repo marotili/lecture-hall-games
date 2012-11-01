@@ -27,13 +27,19 @@ const (
 var mu sync.Mutex
 
 func handleConnection(conn net.Conn) {
+	car := NewCar(Player{"blub"}, sprite)
 	defer func() {
 		log.Println("client disconnected")
+		mu.Lock()
+		for i := range racer.cars {
+			if racer.cars[i] == car {
+				racer.cars = append(racer.cars[:i], racer.cars[i+1:]...)
+			}
+		}
+		mu.Unlock()
 		conn.Close()
 	}()
 	log.Println("client connected")
-
-	car := NewCar(Player{"blub"}, sprite)
 	car.position.x = 100
 	car.position.y = 100
 
