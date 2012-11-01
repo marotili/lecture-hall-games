@@ -40,6 +40,7 @@ type Car struct {
 	layer       int
 	owner       Player
 	sprite      *Sprite
+	steerValue  float32
 }
 
 func (car *Car) Draw() {
