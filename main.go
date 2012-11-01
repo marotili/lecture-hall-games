@@ -41,8 +41,8 @@ func handleConnection(conn net.Conn) {
 		conn.Close()
 	}()
 	log.Println("client connected")
-	car.position.x = 100
-	car.position.y = 100
+	car.position.x = 200
+	car.position.y = 200
 
 	mu.Lock()
 	racer.cars = append(racer.cars, car)
@@ -175,9 +175,8 @@ func main() {
 		gl.Clear(gl.COLOR_BUFFER_BIT)
 
 		racer.Update(t)
-		racer.Render()
-
 		background.Draw(400, 300, 0, 1)
+		racer.Render()
 
 		sdl.GL_SwapBuffers()
 	}
