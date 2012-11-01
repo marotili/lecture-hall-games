@@ -49,9 +49,8 @@ func handleConnection(conn net.Conn) {
 	}
 }
 
-func loadTexture() {
-	gl.Enable(gl.TEXTURE_2D)
-	gl.Disable(gl.TEXTURE_2D)
+func drawTexture() {
+
 }
 
 func main() {
@@ -75,12 +74,12 @@ func main() {
 
 	}
 
-	gl.MatrixMode(gl.PROJECTION)
 	gl.Viewport(0, 0, int(screen.W), int(screen.H))
-	gl.LoadIdentity()
-	gl.Ortho(0, float64(screen.W), float64(screen.H), 0, -1.0, 1.0)
 	gl.ClearColor(1, 1, 1, 0)
 	gl.Clear(gl.COLOR_BUFFER_BIT)
+	gl.MatrixMode(gl.PROJECTION)
+	gl.LoadIdentity()
+	gl.Ortho(0, float64(screen.W), float64(screen.H), 0, -1.0, 1.0)
 
 	rand.Seed(time.Now().UnixNano())
 
@@ -104,10 +103,28 @@ func main() {
 	}()
 
 	running := true
-    last := time.Now()
+	last := time.Now()
+
+	width := 16
+	sprite := NewSprite("artwork/auto.png", width, width*3)
+
+	car := NewCar(Player{"Marco"}, sprite)
+	car.position.x = 100
+	car.position.y = 100
+
+	car2 := NewCar(Player{"Christoph"}, sprite)
+	car2.position.x = 200
+	car2.position.y = 100
+
+	racer := NewRacer()
+	racer.cars = append(racer.cars, car)
+	racer.cars = append(racer.cars, car2)
 
 	for running {
-
+		// move objects
+		current := time.Now()
+		t := current.Sub(last)
+		last = current
 		// process events
 		select {
 		case event := <-sdl.Events:
@@ -116,14 +133,23 @@ func main() {
 				running = false
 			case sdl.ResizeEvent:
 				screen = sdl.SetVideoMode(int(e.W), int(e.H), 32, sdl.RESIZABLE)
+			case sdl.KeyboardEvent:
+				if e.Keysym.Sym == sdl.K_LEFT {
+					car.steer(-1, t)
+				} else if e.Keysym.Sym == sdl.K_RIGHT {
+					car.steer(+1, t)
+				}
 			}
 		default:
 		}
-		// move objects
-		current := time.Now()
-		t := current.Sub(last)
-		last = current
-		fmt.Println(t)
+
+		//		fmt.Println(t)
+
+		gl.ClearColor(1, 1, 1, 0)
+		gl.Clear(gl.COLOR_BUFFER_BIT)
+
+		racer.Update(t)
+		racer.Render()
 
 		sdl.GL_SwapBuffers()
 	}
