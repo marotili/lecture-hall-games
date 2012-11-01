@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/0xe2-0x9a-0x9b/Go-SDL/sdl"
+	"github.com/banthar/gl"
 	"log"
 	"math"
 	"math/rand"
@@ -48,26 +49,45 @@ func handleConnection(conn net.Conn) {
 	}
 }
 
+func loadTexture() {
+	gl.Enable(gl.TEXTURE_2D)
+	gl.Disable(gl.TEXTURE_2D)
+}
+
 func main() {
-	runtime.LockOSThread()
 	log.SetFlags(0)
+	runtime.LockOSThread()
 
 	if sdl.Init(sdl.INIT_EVERYTHING) != 0 {
+		log.Fatal(sdl.GetError())
+	}
+
+	var screen = sdl.SetVideoMode(800, 600, 32, sdl.OPENGL)
+	if screen == nil {
 		log.Fatal(sdl.GetError())
 	}
 
 	sdl.WM_SetCaption("Lecture Hall Games 0.1", "")
 	sdl.EnableUNICODE(1)
 
-	screen := sdl.SetVideoMode(800, 600, 32, sdl.RESIZABLE)
-	if screen == nil {
-		log.Fatal(sdl.GetError())
+	if gl.Init() != 0 {
+		panic("gl error")
+
 	}
+
+	gl.MatrixMode(gl.PROJECTION)
+	gl.Viewport(0, 0, int(screen.W), int(screen.H))
+	gl.LoadIdentity()
+	gl.Ortho(0, float64(screen.W), float64(screen.H), 0, -1.0, 1.0)
+	gl.ClearColor(1, 1, 1, 0)
+	gl.Clear(gl.COLOR_BUFFER_BIT)
 
 	rand.Seed(time.Now().UnixNano())
 
+	sdl.EnableUNICODE(1)
+
 	go func() {
-		ln, err := net.Listen("tcp", ":8080")
+		ln, err := net.Listen("tcp", ":8001")
 		if err != nil {
 			log.Fatal("Server failed")
 		}
@@ -84,7 +104,8 @@ func main() {
 	}()
 
 	running := true
-	last := time.Now()
+    last := time.Now()
+
 	for running {
 
 		// process events
@@ -98,15 +119,13 @@ func main() {
 			}
 		default:
 		}
-
 		// move objects
 		current := time.Now()
 		t := current.Sub(last)
 		last = current
 		fmt.Println(t)
 
-		// render screen
-		screen.FillRect(nil, 0x302019)
+		sdl.GL_SwapBuffers()
 	}
 
 	sdl.Quit()
