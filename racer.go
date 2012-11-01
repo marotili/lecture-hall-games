@@ -174,7 +174,7 @@ func (racer *Racer) Update(elapsedTime time.Duration) {
 func (racer *Racer) Render() {
 	for _, car := range racer.cars {
 //        heightMod := 1/racer.heightGraymap.Modifier(car.position)
-        car.Draw(heightMod)
+        car.Draw(1)
 	}
 	// background layer
 	// map layers
