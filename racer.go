@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"github.com/0xe2-0x9a-0x9b/Go-SDL/mixer"
 	"github.com/0xe2-0x9a-0x9b/Go-SDL/sdl"
 	"github.com/0xe2-0x9a-0x9b/Go-SDL/ttf"
@@ -9,7 +10,6 @@ import (
 	"image/color"
 	"math"
 	"time"
-"fmt"
 )
 
 type Racer struct {
@@ -128,17 +128,16 @@ func (r *Racer) Leave(player *Player) {
 	}
 }
 
-
 func valueAt(img *image.Gray, x, y float32) float32 {
 	dx, dy := x/float32(screenWidth), y/float32(screenHeight)
 	b := img.Bounds().Max
 	px, py := int(dx*float32(b.X)), int(dy*float32(b.Y))
 	v := float32(img.At(px, py).(color.Gray).Y) / 255
 	return v
+}
 
 func (r *Racer) KeyPressed(input sdl.Keysym) {
-
-	fmt.Printf("%d pressed\n",input)
+	fmt.Printf("%d pressed\n", input)
 	if input.Sym == sdl.K_SPACE {
 		r.running = true
 	}
