@@ -22,9 +22,8 @@ public class controller extends Activity {
 	
 	private Socket client;
 	private DataOutputStream outStream;
-	private int buttonCode;
-	private TextView boundingBoxA;
 	private String serverAddress;
+	View parentView;
 	
 	@SuppressLint({ "NewApi", "NewApi" })
 	@Override
@@ -52,51 +51,45 @@ public class controller extends Activity {
         }
         
         
-	    final TextView getCoord = (TextView) findViewById(R.id.textView1);
+        parentView = findViewById(R.id.entire_view);
+       
 
-	    getCoord.setOnTouchListener(new View.OnTouchListener() {
+	    parentView.setOnTouchListener(new View.OnTouchListener() {
 			
 			public synchronized boolean onTouch(View v, MotionEvent event) {
 				
-				Float x = event.getX() / getCoord.getWidth();
-				Float y = event.getY() / getCoord.getHeight();
+				Float x = event.getX();
+				Float y = event.getY();
 				
 				try {
-					outStream.writeFloat(x);
-					outStream.writeFloat(y);
+					if(x < parentView.getWidth()/2)
+					{
+					outStream.writeFloat((float) ( x/ (0.5 * parentView.getWidth())));
+					outStream.writeFloat(y/ parentView.getHeight());
 					outStream.writeInt(0);
-					System.out.println("X: "  + x.toString());
-					System.out.println("Y: "  + y.toString());
+					
+					if(event.getAction() == MotionEvent.ACTION_UP) {
+						outStream.writeFloat(0.5f);
+						outStream.writeFloat(0.5f);
+						outStream.writeInt(0);
+					}
+					
+					}
 				} catch (IOException e) {
-
 					e.printStackTrace();
 				}
-				
-				
-				return true;
-			}
-		});
-
-	    boundingBoxA = (TextView) findViewById(R.id.boundingBoxA);
-	    boundingBoxA.setOnTouchListener(new View.OnTouchListener() {
-			
-			public boolean onTouch(View v, MotionEvent event) {
-				TextView middle = (TextView) findViewById(R.id.textView3);
-				middle.setText("Button A");
-				return true;
-			}
-		});
-	    
-	    TextView boundingBoxB = (TextView) findViewById(R.id.boundingBoxB);
-	    boundingBoxB.setOnTouchListener(new View.OnTouchListener() {
-			
-			public boolean onTouch(View v, MotionEvent event) {
-				TextView middle = (TextView) findViewById(R.id.textView3);
-				middle.setText("Button B");
 				return true;
 			}
 		});
 	}
 	
-
+	@Override
+	public void onPause() {
+		super.onPause();		
+		try {
+			client.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }
