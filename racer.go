@@ -19,11 +19,10 @@ type Racer struct {
 
 	spriteCar        *Sprite
 	spriteBackground *Sprite
+	spriteWaiting    *Sprite
 
 	music *mixer.Music
 	font  *ttf.Font
-
-	textWaiting *sdl.Surface
 }
 
 func NewRacer() (*Racer, error) {
@@ -53,7 +52,8 @@ func NewRacer() (*Racer, error) {
 		return nil, errors.New(sdl.GetError())
 	}
 
-	r.textWaiting = ttf.RenderUTF8_Solid(r.font, "Waiting for other players...", sdl.Color{255, 0, 0, 0})
+	textWaiting := ttf.RenderUTF8_Blended(r.font, "X", sdl.Color{255, 0, 0, 0})
+	r.spriteWaiting = NewSpriteFromSurface(textWaiting)
 
 	return r, nil
 }
@@ -73,10 +73,17 @@ func (r *Racer) Render(screen *sdl.Surface) {
 
 	for _, car := range r.cars {
 		// heightMod := 1/racer.heightGraymap.Modifier(car.position)
-		car.Draw(1)
+
+		size := float32(1.0)
+		if car.owner.ButtonA {
+			size *= 2
+		} else if car.owner.ButtonB {
+			size *= 0.5
+		}
+		car.Draw(size)
 	}
 
-	screen.Blit(&sdl.Rect{100, 100, 200, 200}, r.textWaiting, nil)
+	r.spriteWaiting.Draw(100, 100, 0, 5)
 }
 
 func (r *Racer) Join(player *Player) {
