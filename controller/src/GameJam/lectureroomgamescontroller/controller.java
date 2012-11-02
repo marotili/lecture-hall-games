@@ -23,6 +23,7 @@ public class controller extends Activity {
 	private Socket client;
 	private DataOutputStream outStream;
 	private String serverAddress;
+	private String nickname;
 	View parentView;
 	
 	@SuppressLint({ "NewApi", "NewApi" })
@@ -32,17 +33,23 @@ public class controller extends Activity {
         setContentView(R.layout.controller);
         
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-
         StrictMode.setThreadPolicy(policy); 
         
         Bundle bundle = getIntent().getExtras();
        	if (bundle != null) {
        		serverAddress = bundle.getString("serverAddress");
+       		nickname = bundle.getString("nickname");
         }
         			
         try {
         	client = new Socket(serverAddress, 8001);
         	outStream = new DataOutputStream(client.getOutputStream());
+        	
+        	int nicknameLength = nickname.length();
+        	
+        	outStream.writeInt(nicknameLength);
+        	outStream.write(nickname.getBytes());
+        	
         	
         } catch(UnknownHostException exception) {
         	exception.printStackTrace();
@@ -56,28 +63,30 @@ public class controller extends Activity {
 
 	    parentView.setOnTouchListener(new View.OnTouchListener() {
 			
-			public synchronized boolean onTouch(View v, MotionEvent event) {
-				
+			public synchronized boolean onTouch(View v, MotionEvent event) {			
 				Float x = event.getX();
 				Float y = event.getY();
 				
-				try {
-					if(x < parentView.getWidth()/2)
-					{
-					outStream.writeFloat((float) ( x/ (0.5 * parentView.getWidth())));
-					outStream.writeFloat(y/ parentView.getHeight());
-					outStream.writeInt(0);
+				if(event.getAction() == MotionEvent.ACTION_MOVE) {
+					int historySize = event.getHistorySize();
 					
-					if(event.getAction() == MotionEvent.ACTION_UP) {
-						outStream.writeFloat(0.5f);
-						outStream.writeFloat(0.5f);
-						outStream.writeInt(0);
+					for(int i = 0 ; i < historySize ; i++) {
+						float hx = event.getHistoricalX(i);
+						if(hx >  (0.5 * parentView.getWidth())) {
+							System.out.println("2nd Half");
+						}
 					}
-					
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
 				}
+				
+				if(x < parentView.getWidth()/2)
+				{
+				writeToServer((float) ( x / (0.5 * parentView.getWidth())), y / parentView.getHeight(), 0);
+					
+				if(event.getAction() == MotionEvent.ACTION_UP) {
+					writeToServer(0.0f, 0.0f, 0);
+					}
+				}
+
 				return true;
 			}
 		});
@@ -92,4 +101,15 @@ public class controller extends Activity {
 			e.printStackTrace();
 		}
 	}
+	
+	private void writeToServer(float x_value, float y_value, int buttonCode) {
+		try {
+			outStream.writeFloat(x_value*2.0f-1.0f);
+			outStream.writeFloat(y_value*2.0f-1.0f);
+			outStream.writeInt(buttonCode);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 }
