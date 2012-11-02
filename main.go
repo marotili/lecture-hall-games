@@ -5,14 +5,18 @@ import (
 	"github.com/0xe2-0x9a-0x9b/Go-SDL/mixer"
 	"github.com/0xe2-0x9a-0x9b/Go-SDL/sdl"
 	"github.com/banthar/gl"
+	"go/build"
 	"io"
 	"log"
 	"math"
 	"net"
+	"os"
 	"runtime"
 	"sync"
 	"time"
 )
+
+const basePkg = "lecture-hall-games"
 
 type Player struct {
 	Conn      net.Conn
@@ -100,6 +104,10 @@ func main() {
 	if mixer.OpenAudio(mixer.DEFAULT_FREQUENCY, mixer.DEFAULT_FORMAT,
 		mixer.DEFAULT_CHANNELS, 4096) != 0 {
 		log.Fatal(sdl.GetError())
+	}
+
+	if p, err := build.Default.Import(basePkg, "", build.FindOnly); err == nil {
+		os.Chdir(p.Dir)
 	}
 
 	var err error
