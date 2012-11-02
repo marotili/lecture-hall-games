@@ -15,9 +15,13 @@ import (
 	"runtime"
 	"sync"
 	"time"
+	"math/rand"
+	"fmt"
 )
 
 const basePkg = "github.com/fruehwirth.marco/lecture-hall-games"
+const numberLevels = 2
+const numberCars = 1
 
 type Player struct {
 	Conn      net.Conn
@@ -135,7 +139,11 @@ func main() {
 	}
 
 	var err error
-	if game, err = NewRacer(); err != nil {
+	
+	rand.Seed(time.Now().UnixNano())
+	levelDir := fmt.Sprintf("data/levels/demolevel%d",3+rand.Intn(numberLevels))
+	//carsDir := fmt.Sprintf(" data/cars/car%d/", 1+rand.Intn(numberCars))
+	if game, err = NewRacer(levelDir); err != nil {
 		log.Fatal(err)
 	}
 

@@ -9,6 +9,7 @@ import (
 	"image/color"
 	"math"
 	"time"
+	"path/filepath"
 )
 
 type Racer struct {
@@ -30,14 +31,14 @@ type Racer struct {
 	font  *ttf.Font
 }
 
-func NewRacer() (*Racer, error) {
+func NewRacer(levelDir string) (*Racer, error) {
 	r := &Racer{cars: make([]*Car, 0)}
 
 	var err error
-	if r.obstaclemap, err = LoadImageGray("data/levels/demolevel3/velocity.png"); err != nil {
+	if r.obstaclemap, err = LoadImageGray(filepath.Join(levelDir,"velocity.png")); err != nil {
 		return nil, err
 	}
-	if r.heightmap, err = LoadImageGray("data/levels/demolevel3/z.png"); err != nil {
+	if r.heightmap, err = LoadImageGray(filepath.Join(levelDir,"z.png")); err != nil {
 		return nil, err
 	}
 
@@ -49,10 +50,10 @@ func NewRacer() (*Racer, error) {
 		return nil, err
 	}
 
-	if r.spriteForeground, err = NewSprite("data/levels/demolevel3/foreground.png", screenWidth, screenHeight); err != nil {
+	if r.spriteForeground, err = NewSprite(filepath.Join(levelDir,"foreground.png"), screenWidth, screenHeight); err != nil {
 		return nil, err
 	}
-	if r.spriteBackground, err = NewSprite("data/levels/demolevel3/background.png", screenWidth, screenHeight); err != nil {
+	if r.spriteBackground, err = NewSprite(filepath.Join(levelDir, "background.png"), screenWidth, screenHeight); err != nil {
 		return nil, err
 	}
 
