@@ -56,10 +56,15 @@ public class controller extends Activity {
 				
 				int action = event.getAction() & MotionEvent.ACTION_MASK;
 				
-				if(action != MotionEvent.ACTION_UP && action != MotionEvent.ACTION_POINTER_UP) {
+				int pointer = (event.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK) >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+				
+				
+				if(action != MotionEvent.ACTION_UP) {
 					for(int i = 0 ; i < event.getPointerCount() ; i++) {
-						
-						
+						if(action == MotionEvent.ACTION_POINTER_UP && pointer == i)
+						{
+							continue;
+						}
 						float currentX = event.getX(i) / parentView.getWidth();
 						float currentY = event.getY(i) / parentView.getHeight();
 						
