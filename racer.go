@@ -9,6 +9,7 @@ import (
 	"image/color"
 	"math"
 	"time"
+"fmt"
 )
 
 type Racer struct {
@@ -23,6 +24,8 @@ type Racer struct {
 	spriteForeground *Sprite
 	spriteBackground *Sprite
 	spriteWaiting    *Sprite
+
+	running bool
 
 	music *mixer.Music
 	font  *ttf.Font
@@ -69,6 +72,9 @@ func NewRacer() (*Racer, error) {
 }
 
 func (r *Racer) Update(t time.Duration) {
+	if !r.running {
+		return
+	}
 	for _, car := range r.cars {
 		car.velocity = 100 * valueAt(r.obstaclemap, car.position.x, car.position.y)
 		car.position = car.position.Add(car.direction.MulScalar(car.velocity * float32(t.Seconds())))
@@ -94,6 +100,7 @@ func (r *Racer) Render(screen *sdl.Surface) {
 	}
 
 	r.spriteForeground.Draw(screenWidth/2, screenHeight/2, 0, 1, true)
+
 }
 
 func (r *Racer) Join(player *Player) {
@@ -116,9 +123,11 @@ func (r *Racer) Leave(player *Player) {
 		}
 	}
 	if len(r.cars) == 0 {
+		r.running = false
 		mixer.PauseMusic()
 	}
 }
+
 
 func valueAt(img *image.Gray, x, y float32) float32 {
 	dx, dy := x/float32(screenWidth), y/float32(screenHeight)
@@ -126,6 +135,13 @@ func valueAt(img *image.Gray, x, y float32) float32 {
 	px, py := int(dx*float32(b.X)), int(dy*float32(b.Y))
 	v := float32(img.At(px, py).(color.Gray).Y) / 255
 	return v
+
+func (r *Racer) KeyPressed(input sdl.Keysym) {
+
+	fmt.Printf("%d pressed\n",input)
+	if input.Sym == sdl.K_SPACE {
+		r.running = true
+	}
 }
 
 type Car struct {

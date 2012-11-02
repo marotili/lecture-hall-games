@@ -38,6 +38,7 @@ type Game interface {
 	Render(screen *sdl.Surface)
 	Join(player *Player)
 	Leave(player *Player)
+	KeyPressed(input sdl.Keysym)
 }
 
 func handleConnection(conn net.Conn) {
@@ -164,6 +165,8 @@ func main() {
 			case sdl.ResizeEvent:
 				screen = sdl.SetVideoMode(int(e.W), int(e.H), 32, sdl.RESIZABLE)
 			case sdl.KeyboardEvent:
+					game.KeyPressed(e.Keysym)
+				
 			}
 		default:
 		}
