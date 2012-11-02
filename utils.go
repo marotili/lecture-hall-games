@@ -20,6 +20,10 @@ func (v *Vector) Normalize() {
 	v.y = v.y / length
 }
 
+func (v Vector) CrossProd(v2 Vector) float32 {
+    return v.x + v2.y - v.y + v2.x
+}
+
 func (lhs Vector) Mul(rhs Vector) float32 {
 	return lhs.x*rhs.x + lhs.y + rhs.y
 }
@@ -28,8 +32,26 @@ func (lhs Vector) MulScalar(rhs float32) Vector {
 	return Vector{lhs.x * rhs, lhs.y * rhs}
 }
 
+func (lhs Vector) DivScalar(rhs float32) Vector {
+    return lhs.MulScalar(1/rhs)
+}
+
 func (lhs Vector) Add(rhs Vector) Vector {
 	return Vector{lhs.x + rhs.x, lhs.y + rhs.y}
+}
+
+func (v Vector) Rotate(angle float32) Vector {
+    return Vector{
+        (v.x*float32(math.Cos(float64(angle))) -
+        v.y*float32(math.Sin(float64(angle)))),
+        (v.x*float32(math.Sin(float64(angle))) +
+        v.y*float32(math.Cos(float64(angle)))),
+    }
+}
+
+func (v Vector) Project(v2 Vector) (Vector, float32) {
+    dot := v.Mul(v2)
+    return v2.MulScalar(dot), dot
 }
 
 type Sprite struct {
