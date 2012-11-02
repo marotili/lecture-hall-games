@@ -80,16 +80,16 @@ func NewSpriteFromSurface(surface *sdl.Surface) *Sprite {
 	tex := uploadTexture(img)
 	return &Sprite{img, tex, width, height}
 }
- 	
+
 func (s *Sprite) Draw(x, y, angle, scale float32, blend bool) {
 	gl.Enable(gl.TEXTURE_2D)
-
-	gl.Enable(gl.BLEND)
 	gl.Disable(gl.COLOR_MATERIAL)
 	if blend {
-		gl.BlendFunc(gl.ONE,gl.ZERO)
-	} else {
 		gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+		gl.Enable(gl.BLEND)
+	} else {
+		gl.Disable(gl.BLEND)
+		gl.BlendFunc(gl.ONE, gl.ZERO)
 	}
 
 	gl.MatrixMode(gl.MODELVIEW)

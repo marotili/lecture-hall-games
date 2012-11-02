@@ -17,7 +17,9 @@ type Racer struct {
 	obstaclemap *image.Gray
 	heightmap   *image.Gray
 
-	spriteCar        *Sprite
+	spriteCarFG *Sprite
+	spriteCarBG *Sprite
+
 	spriteForeground *Sprite
 	spriteBackground *Sprite
 	spriteWaiting    *Sprite
@@ -30,21 +32,25 @@ func NewRacer() (*Racer, error) {
 	r := &Racer{cars: make([]*Car, 0)}
 
 	var err error
-	if r.obstaclemap, err = LoadImageGray("data/velocity.png"); err != nil {
+	if r.obstaclemap, err = LoadImageGray("data/levels/demolevel3/velocity.png"); err != nil {
 		return nil, err
 	}
 	if r.heightmap, err = LoadImageGray("data/levels/demolevel3/z.png"); err != nil {
 		return nil, err
 	}
 
-	if r.spriteCar, err = NewSprite("data/car.png", 16, 48); err != nil {
+	carSize := 0.04 * float32(screenWidth)
+	if r.spriteCarFG, err = NewSprite("data/cars/car1/fg.png", carSize, carSize); err != nil {
+		return nil, err
+	}
+	if r.spriteCarBG, err = NewSprite("data/cars/car1/bg.png", carSize, carSize); err != nil {
 		return nil, err
 	}
 
-	if r.spriteForeground, err = NewSprite("data/levels/demolevel3/foreground.png", 800, 600); err != nil {
+	if r.spriteForeground, err = NewSprite("data/levels/demolevel3/foreground.png", screenWidth, screenHeight); err != nil {
 		return nil, err
 	}
-	if r.spriteBackground, err = NewSprite("data/levels/demolevel3/background.png", 800, 600); err != nil {
+	if r.spriteBackground, err = NewSprite("data/levels/demolevel3/background.png", screenWidth, screenHeight); err != nil {
 		return nil, err
 	}
 
@@ -64,30 +70,30 @@ func NewRacer() (*Racer, error) {
 
 func (r *Racer) Update(t time.Duration) {
 	for _, car := range r.cars {
-		car.velocity = car.maxVelocity * float32(r.obstaclemap.At(int(car.position.x), int(car.position.y)).(color.Gray).Y) / 255
-		car.position =
-			car.position.Add(car.direction.MulScalar(car.velocity * float32(t.Seconds())))
+		car.velocity = 100 * valueAt(r.obstaclemap, car.position.x, car.position.y)
+		car.position = car.position.Add(car.direction.MulScalar(car.velocity * float32(t.Seconds())))
 
 		car.steer(car.owner.JoystickX, t)
 	}
 }
 
 func (r *Racer) Render(screen *sdl.Surface) {
-	r.spriteBackground.Draw(400, 300, 0, 1,false)
+	r.spriteBackground.Draw(screenWidth/2, screenHeight/2, 0, 1, false)
 
 	for _, car := range r.cars {
 		// heightMod := 1/racer.heightGraymap.Modifier(car.position)
 
 		size := float32(1.0)
+		size *= (1 - 0.2*valueAt(r.heightmap, car.position.x, car.position.y))
 		if car.owner.ButtonA {
-			size *= 2
+			size *= 1.5
 		} else if car.owner.ButtonB {
-			size *= 0.5
+			size *= 0.75
 		}
 		car.Draw(size)
 	}
 
-	r.spriteForeground.Draw(400, 300, 0, 1,true)
+	r.spriteForeground.Draw(screenWidth/2, screenHeight/2, 0, 1, true)
 }
 
 func (r *Racer) Join(player *Player) {
@@ -95,7 +101,7 @@ func (r *Racer) Join(player *Player) {
 		mixer.ResumeMusic()
 		r.music.PlayMusic(-1)
 	}
-	car := NewCar(player, r.spriteCar)
+	car := NewCar(player, r.spriteCarFG, r.spriteCarBG)
 	car.position.x = 200
 	car.position.y = 200
 	r.cars = append(r.cars, car)
@@ -114,6 +120,14 @@ func (r *Racer) Leave(player *Player) {
 	}
 }
 
+func valueAt(img *image.Gray, x, y float32) float32 {
+	dx, dy := x/float32(screenWidth), y/float32(screenHeight)
+	b := img.Bounds().Max
+	px, py := int(dx*float32(b.X)), int(dy*float32(b.Y))
+	v := float32(img.At(px, py).(color.Gray).Y) / 255
+	return v
+}
+
 type Car struct {
 	position    Vector
 	direction   Vector
@@ -122,17 +136,21 @@ type Car struct {
 	zLevel      int
 	layer       int
 	owner       *Player
-	sprite      *Sprite
-	steerValue  float32
+
+	spriteBG   *Sprite
+	spriteFG   *Sprite
+	steerValue float32
 }
 
 func (car *Car) Draw(heightMod float32) {
 	angle := math.Pi/2.0 + math.Atan2(float64(car.direction.y), float64(car.direction.x))
-	car.sprite.Draw(float32(car.position.x), float32(car.position.y),
-		float32(angle), heightMod,false)
+	car.spriteBG.Draw(float32(car.position.x), float32(car.position.y),
+		float32(angle), heightMod, true)
+	car.spriteFG.Draw(float32(car.position.x), float32(car.position.y),
+		float32(angle), heightMod, true)
 }
 
-func NewCar(owner *Player, sprite *Sprite) *Car {
+func NewCar(owner *Player, spriteFG, spriteBG *Sprite) *Car {
 	return &Car{
 		position:    Vector{0, 0},
 		direction:   Vector{0, 1},
@@ -141,7 +159,8 @@ func NewCar(owner *Player, sprite *Sprite) *Car {
 		zLevel:      0,
 		layer:       0,
 		owner:       owner,
-		sprite:      sprite,
+		spriteFG:    spriteFG,
+		spriteBG:    spriteBG,
 	}
 }
 

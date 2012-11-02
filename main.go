@@ -28,6 +28,11 @@ type Player struct {
 	JoystickY float32
 }
 
+const (
+	screenWidth  = 1024
+	screenHeight = 768
+)
+
 type Game interface {
 	Update(t time.Duration)
 	Render(screen *sdl.Surface)
@@ -96,7 +101,7 @@ func main() {
 	if sdl.Init(sdl.INIT_EVERYTHING) != 0 {
 		log.Fatal(sdl.GetError())
 	}
-	var screen = sdl.SetVideoMode(800, 600, 32, sdl.OPENGL)
+	var screen = sdl.SetVideoMode(screenWidth, screenHeight, 32, sdl.OPENGL|sdl.HWSURFACE|sdl.GL_DOUBLEBUFFER)
 	if screen == nil {
 		log.Fatal(sdl.GetError())
 	}
@@ -111,6 +116,9 @@ func main() {
 	gl.MatrixMode(gl.PROJECTION)
 	gl.LoadIdentity()
 	gl.Ortho(0, float64(screen.W), float64(screen.H), 0, -1.0, 1.0)
+	gl.Disable(gl.LIGHTING)
+	gl.Disable(gl.DEPTH_TEST)
+	gl.TexEnvi(gl.TEXTURE_ENV, gl.TEXTURE_ENV_MODE, gl.MODULATE)
 
 	if mixer.OpenAudio(mixer.DEFAULT_FREQUENCY, mixer.DEFAULT_FORMAT,
 		mixer.DEFAULT_CHANNELS, 4096) != 0 {
