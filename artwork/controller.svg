@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="1920"
+   height="1080"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.3.1 r9886"
+   sodipodi:docname="controller.svg"
+   inkscape:export-filename="/home/christoph/gopath/src/github.com/fruehwirth.marco/lecture-hall-games/data/controller.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
+  <defs
+     id="defs4">
+    <filter
+       inkscape:collect="always"
+       id="filter3883">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="11.472969"
+         id="feGaussianBlur3885" />
+    </filter>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.35"
+     inkscape:cx="461.79753"
+     inkscape:cy="588.16089"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     width="1052.36px"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     inkscape:snap-object-midpoints="false"
+     inkscape:snap-grids="false"
+     inkscape:window-width="1600"
+     inkscape:window-height="844"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1">
+    <sodipodi:guide
+       orientation="1,0"
+       position="960,694.28571"
+       id="guide2985" />
+    <sodipodi:guide
+       orientation="0,1"
+       position="-2.8571429,540"
+       id="guide2987" />
+    <sodipodi:guide
+       orientation="1,0"
+       position="1440,757.14286"
+       id="guide2989" />
+    <sodipodi:guide
+       orientation="1,0"
+       position="480,1028.5714"
+       id="guide2991" />
+    <sodipodi:guide
+       orientation="0,1"
+       position="-445.71429,270"
+       id="guide2993" />
+    <sodipodi:guide
+       orientation="1,0"
+       position="1200,700"
+       id="guide2997" />
+    <sodipodi:guide
+       orientation="1,0"
+       position="1680,1254.2857"
+       id="guide2999" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,27.637733)">
+    <g
+       id="g3889">
+      <rect
+         ry="299.99994"
+         rx="300"
+         y="3.7908351"
+         x="45.714287"
+         height="1025.7142"
+         width="1839.9999"
+         id="rect3084"
+         style="fill:#b3b3b3;fill-opacity:1;fill-rule:nonzero;stroke:#666666;stroke-width:12.29999924;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <path
+         transform="translate(0,-27.637733)"
+         id="rect3104"
+         d="M 1885.7188 602.5625 C 1620.0105 658.29684 1287.0904 691.4375 925.71875 691.4375 C 599.75416 691.4375 296.93976 664.47074 45.71875 618.28125 L 45.71875 757.15625 C 45.71875 923.35622 179.51875 1057.1562 345.71875 1057.1562 L 1585.7188 1057.1562 C 1751.9188 1057.1562 1885.7188 923.35622 1885.7188 757.15625 L 1885.7188 602.5625 z "
+         style="fill:#cccccc;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:12.29999924000000000;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;filter:url(#filter3883);opacity:0.5" />
+      <rect
+         style="fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#666666;stroke-width:12.29999924000000000;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+         id="rect3887"
+         width="1839.9999"
+         height="1025.7142"
+         x="45.714287"
+         y="3.7908351"
+         rx="300"
+         ry="299.99994" />
+    </g>
+    <path
+       sodipodi:type="arc"
+       style="fill:none;stroke:#666666;stroke-width:12.30000019000000044;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="path2995"
+       sodipodi:cx="302.85715"
+       sodipodi:cy="494.28571"
+       sodipodi:rx="100"
+       sodipodi:ry="100"
+       d="m 402.85715,494.28571 c 0,55.22847 -44.77153,100 -100,100 -55.22848,0 -100,-44.77153 -100,-100 0,-55.22848 44.77152,-100 100,-100 55.22847,0 100,44.77152 100,100 z"
+       transform="translate(177.14285,18.076561)" />
+    <path
+       sodipodi:type="arc"
+       style="fill:none;stroke:#d40000;stroke-width:12.30000019000000044;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="path3001"
+       sodipodi:cx="1189.2858"
+       sodipodi:cy="905"
+       sodipodi:rx="95"
+       sodipodi:ry="95"
+       d="m 1284.2858,905 c 0,52.46705 -42.533,95 -95,95 -52.4671,0 -95,-42.53295 -95,-95 0,-52.46705 42.5329,-95 95,-95 52.467,0 95,42.53295 95,95 z"
+       transform="translate(10.714233,-122.63773)" />
+    <path
+       transform="translate(10.714233,-122.63773)"
+       d="m 1284.2858,905 c 0,52.46705 -42.533,95 -95,95 -52.4671,0 -95,-42.53295 -95,-95 0,-52.46705 42.5329,-95 95,-95 52.467,0 95,42.53295 95,95 z"
+       sodipodi:ry="95"
+       sodipodi:rx="95"
+       sodipodi:cy="905"
+       sodipodi:cx="1189.2858"
+       id="path3003"
+       style="fill:#e9afaf;stroke:#d40000;stroke-width:12.30000019000000044;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       sodipodi:type="arc" />
+    <path
+       transform="translate(490.71423,-122.63773)"
+       d="m 1284.2858,905 c 0,52.46705 -42.533,95 -95,95 -52.4671,0 -95,-42.53295 -95,-95 0,-52.46705 42.5329,-95 95,-95 52.467,0 95,42.53295 95,95 z"
+       sodipodi:ry="95"
+       sodipodi:rx="95"
+       sodipodi:cy="905"
+       sodipodi:cx="1189.2858"
+       id="path3003-1"
+       style="fill:#aade87;stroke:#338000;stroke-width:12.30000019000000044;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       sodipodi:type="arc" />
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot3023"
+       style="font-size:144px;font-style:normal;font-weight:bold;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#aa0000;fill-opacity:1;stroke:#d40000;font-family:Sans;-inkscape-font-specification:Sans Bold"
+       transform="translate(889.14062,431.67414)"><flowRegion
+         id="flowRegion3025"><rect
+           id="rect3027"
+           width="237.14285"
+           height="254.28572"
+           x="194.28572"
+           y="257.14285"
+           style="font-size:144px;font-weight:bold;text-align:center;text-anchor:middle;fill:#aa0000;stroke:#d40000;-inkscape-font-specification:Sans Bold" /></flowRegion><flowPara
+         id="flowPara3029"
+         style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-family:Ubuntu;-inkscape-font-specification:Ubuntu Medium">B</flowPara></flowRoot>    <flowRoot
+       xml:space="preserve"
+       id="flowRoot3023-8"
+       style="font-size:144px;font-style:normal;font-weight:bold;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#338000;fill-opacity:1;stroke:#338000;stroke-width:1.03080523;font-family:Sans;-inkscape-font-specification:Sans Bold"
+       transform="matrix(0.94112383,0,0,1,1386.7051,427.67414)"><flowRegion
+         id="flowRegion3025-1"
+         style="stroke-width:1.03080523"><rect
+           id="rect3027-9"
+           width="237.14285"
+           height="254.28572"
+           x="194.28572"
+           y="257.14285"
+           style="font-size:144px;font-weight:bold;text-align:center;text-anchor:middle;fill:#338000;stroke:#338000;stroke-width:1.03080523;-inkscape-font-specification:Sans Bold" /></flowRegion><flowPara
+         id="flowPara3029-3"
+         style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;stroke-width:1.06255949;font-family:Ubuntu;-inkscape-font-specification:Ubuntu Medium">A</flowPara></flowRoot>    <path
+       sodipodi:type="arc"
+       style="fill:#676c53;stroke:#000000;stroke-width:21;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="path2995-1"
+       sodipodi:cx="302.85715"
+       sodipodi:cy="494.28571"
+       sodipodi:rx="100"
+       sodipodi:ry="100"
+       d="m 402.85715,494.28571 c 0,55.22847 -44.77153,100 -100,100 -55.22848,0 -100,-44.77153 -100,-100 0,-55.22848 44.77152,-100 100,-100 55.22847,0 100,44.77152 100,100 z"
+       transform="matrix(0.58571429,0,0,0.58571429,302.61224,222.85207)" />
+    <text
+       xml:space="preserve"
+       style="font-size:89.38748169px;font-style:normal;font-weight:normal;text-align:end;line-height:125%;letter-spacing:0px;word-spacing:0px;text-anchor:end;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="1680"
+       y="221.01456"
+       id="text3076"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3078"
+         x="1680"
+         y="221.01456"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Ubuntu;-inkscape-font-specification:Ubuntu">Lecture Hall</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:198.23771667px;font-style:normal;font-weight:normal;text-align:end;line-height:125%;letter-spacing:0px;word-spacing:0px;text-anchor:end;fill:#002255;fill-opacity:1;stroke:none;font-family:Sans"
+       x="1680"
+       y="386.64801"
+       id="text3080"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3082"
+         x="1680"
+         y="386.64801"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#002255;font-family:Ubuntu;-inkscape-font-specification:Ubuntu">Games</tspan></text>
+  </g>
+</svg>

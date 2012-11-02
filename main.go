@@ -2,83 +2,130 @@ package main
 
 import (
 	"encoding/binary"
-	"fmt"
+	"github.com/0xe2-0x9a-0x9b/Go-SDL/mixer"
 	"github.com/0xe2-0x9a-0x9b/Go-SDL/sdl"
+	"github.com/banthar/gl"
+	"go/build"
+	"io"
 	"log"
 	"math"
-	"math/rand"
 	"net"
+	"os"
 	"runtime"
+	"sync"
 	"time"
 )
 
-type Game interface {
-	Run()
+const basePkg = "github.com/fruehwirth.marco/lecture-hall-games"
+
+type Player struct {
+	Conn      net.Conn
+	ButtonA   bool
+	ButtonB   bool
+	JoystickX float32
+	JoystickY float32
 }
 
-const (
-	ButtonA = 1
-	ButtonB = 2
-)
+type Game interface {
+	Update(t time.Duration)
+	Render()
+	Join(player *Player)
+	Leave(player *Player)
+}
 
 func handleConnection(conn net.Conn) {
-	defer conn.Close()
-	log.Println("client connected")
+	player := &Player{Conn: conn, JoystickX: 0.5, JoystickY: 0.5}
+	defer func() {
+		log.Printf("Player left (%s)\n", conn.RemoteAddr())
+		mu.Lock()
+		game.Leave(player)
+		mu.Unlock()
+	}()
+	log.Printf("Player joined (%s)\n", conn.RemoteAddr())
+	mu.Lock()
+	game.Join(player)
+	mu.Unlock()
 
 	buf := make([]byte, 12)
 	for {
-		if _, err := conn.Read(buf); err != nil {
-			log.Println(err)
+		if _, err := io.ReadFull(conn, buf); err != nil {
+			if err != io.EOF {
+				log.Println(err)
+			}
 			return
 		}
-		joyX := math.Float32frombits(binary.BigEndian.Uint32(buf))
-		if joyX > 1.0 {
-			joyX = 1.0
-		} else if joyX < -1.0 {
-			joyX = -1.0
-		}
-		joyY := math.Float32frombits(binary.BigEndian.Uint32(buf[4:]))
-		if joyY > 1.0 {
-			joyY = 1.0
-		} else if joyY < -1.0 {
-			joyY = -1.0
-		}
+		mu.Lock()
+		player.JoystickX = math.Float32frombits(binary.BigEndian.Uint32(buf))
+		player.JoystickY = math.Float32frombits(binary.BigEndian.Uint32(buf[4:]))
 		buttons := binary.BigEndian.Uint32(buf[8:])
-		fmt.Println(joyX, joyY, buttons)
+		player.ButtonA = buttons&1 != 0
+		player.ButtonB = buttons&2 != 0
+		if player.JoystickX < 0 {
+			player.JoystickX = 0
+		} else if player.JoystickX > 1 {
+			player.JoystickX = 1
+		}
+		if player.JoystickY < 0 {
+			player.JoystickY = 0
+		} else if player.JoystickY > 1 {
+			player.JoystickY = 1
+		}
+		mu.Unlock()
 	}
 }
 
+var (
+	game Game
+	mu   sync.Mutex
+)
+
 func main() {
 	runtime.LockOSThread()
-	log.SetFlags(0)
 
 	if sdl.Init(sdl.INIT_EVERYTHING) != 0 {
 		log.Fatal(sdl.GetError())
 	}
-
-	sdl.WM_SetCaption("Lecture Hall Games 0.1", "")
-	sdl.EnableUNICODE(1)
-
-	screen := sdl.SetVideoMode(800, 600, 32, sdl.RESIZABLE)
+	var screen = sdl.SetVideoMode(800, 600, 32, sdl.OPENGL)
 	if screen == nil {
 		log.Fatal(sdl.GetError())
 	}
+	sdl.WM_SetCaption("Lecture Hall Games", "")
+	sdl.EnableUNICODE(1)
+	if gl.Init() != 0 {
+		log.Fatal("could not initialize OpenGL")
+	}
+	gl.Viewport(0, 0, int(screen.W), int(screen.H))
+	gl.ClearColor(1, 1, 1, 0)
+	gl.Clear(gl.COLOR_BUFFER_BIT)
+	gl.MatrixMode(gl.PROJECTION)
+	gl.LoadIdentity()
+	gl.Ortho(0, float64(screen.W), float64(screen.H), 0, -1.0, 1.0)
 
-	rand.Seed(time.Now().UnixNano())
+	if mixer.OpenAudio(mixer.DEFAULT_FREQUENCY, mixer.DEFAULT_FORMAT,
+		mixer.DEFAULT_CHANNELS, 4096) != 0 {
+		log.Fatal(sdl.GetError())
+	}
+
+	if p, err := build.Default.Import(basePkg, "", build.FindOnly); err == nil {
+		os.Chdir(p.Dir)
+	}
+
+	var err error
+	if game, err = NewRacer(); err != nil {
+		log.Fatal(err)
+	}
 
 	go func() {
-		ln, err := net.Listen("tcp", ":8080")
+		listen, err := net.Listen("tcp", ":8001")
 		if err != nil {
-			log.Fatal("Server failed")
+			log.Fatal(err)
 		}
-
 		for {
-			conn, err := ln.Accept()
+			conn, err := listen.Accept()
 			if err != nil {
-				log.Fatal("Client failed")
+				log.Println(err)
 				continue
 			}
-
 			go handleConnection(conn)
 		}
 	}()
@@ -86,8 +133,6 @@ func main() {
 	running := true
 	last := time.Now()
 	for running {
-
-		// process events
 		select {
 		case event := <-sdl.Events:
 			switch e := event.(type) {
@@ -95,18 +140,21 @@ func main() {
 				running = false
 			case sdl.ResizeEvent:
 				screen = sdl.SetVideoMode(int(e.W), int(e.H), 32, sdl.RESIZABLE)
+			case sdl.KeyboardEvent:
 			}
 		default:
 		}
 
-		// move objects
 		current := time.Now()
 		t := current.Sub(last)
 		last = current
-		fmt.Println(t)
 
-		// render screen
-		screen.FillRect(nil, 0x302019)
+		mu.Lock()
+		game.Update(t)
+		game.Render()
+		mu.Unlock()
+
+		sdl.GL_SwapBuffers()
 	}
 
 	sdl.Quit()
