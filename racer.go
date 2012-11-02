@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"github.com/0xe2-0x9a-0x9b/Go-SDL/mixer"
 	"github.com/0xe2-0x9a-0x9b/Go-SDL/sdl"
 	"github.com/0xe2-0x9a-0x9b/Go-SDL/ttf"
@@ -137,7 +136,6 @@ func valueAt(img *image.Gray, x, y float32) float32 {
 }
 
 func (r *Racer) KeyPressed(input sdl.Keysym) {
-	fmt.Printf("%d pressed\n", input)
 	if input.Sym == sdl.K_SPACE {
 		r.running = true
 	}
