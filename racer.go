@@ -1,6 +1,8 @@
 package main
 
 import (
+"log"
+    "math"
 	"errors"
 	"github.com/0xe2-0x9a-0x9b/Go-SDL/mixer"
 	"github.com/0xe2-0x9a-0x9b/Go-SDL/sdl"
@@ -13,6 +15,8 @@ import (
 
 type Racer struct {
 	cars []*Car
+
+    carSize float32
 
 	obstaclemap *image.Gray
 	heightmap   *image.Gray
@@ -48,6 +52,8 @@ func NewRacer(levelDir string) (*Racer, error) {
 	if r.spriteCarBG, err = NewSprite("data/cars/car1/bg.png", carSize, carSize); err != nil {
 		return nil, err
 	}
+
+    r.carSize = carSize
 
 	if r.spriteForeground, err = NewSprite(filepath.Join(levelDir, "foreground.png"), screenWidth, screenHeight); err != nil {
 		return nil, err
@@ -96,7 +102,7 @@ func (r *Racer) Join(player *Player) {
 		mixer.ResumeMusic()
 		r.music.PlayMusic(-1)
 	}
-	car := NewCar(player, r.spriteCarFG, r.spriteCarBG)
+	car := NewCar(player, r.spriteCarFG, r.spriteCarBG, r.carSize)
 	car.position.x = 200
 	car.position.y = 200
 	r.cars = append(r.cars, car)
@@ -159,7 +165,7 @@ func (w *Wheel) CalculateForce(relativeGroundSpeed Vector, tDur time.Duration) V
 
 	forwardVel, forwardMag := velDiff.Project(w.forwardAxis)
 
-	responseForce := sideVel.MulScalar(-2)
+	responseForce := sideVel.MulScalar(-1)
 	responseForce = responseForce.Add(forwardVel.MulScalar(-1))
 
 	w.torque += forwardMag * w.radius
@@ -239,7 +245,7 @@ func (car *Car) Update(time time.Duration) {
 		car.SetBrakes(0)
 	}
 
-	car.Steer(car.owner.JoystickX)
+	car.Steer(-car.owner.JoystickX)
 	for _, wheel := range car.wheels {
 		worldWheelOffset := car.RelativeToWorld(wheel.position)
 		worldWheelGroundVel := car.PointVel(worldWheelOffset)
@@ -249,6 +255,8 @@ func (car *Car) Update(time time.Duration) {
 
 		car.AddForce(worldResponseForce, worldWheelOffset)
 	}
+
+    log.Printf("%f", t)
 
 	acceleration := car.force.DivScalar(car.mass)
 	car.velocity = car.velocity.Add(acceleration.MulScalar(t))
@@ -270,7 +278,7 @@ func (car *Car) Draw(heightMod float32) {
 		float32(car.angle), heightMod, true)
 }
 
-func NewCar(owner *Player, spriteFG, spriteBG *Sprite) *Car {
+func NewCar(owner *Player, spriteFG, spriteBG *Sprite, carSize float32) *Car {
 	return &Car{
 		position:        Vector{0, 0},
 		velocity:        Vector{0, 0},
@@ -282,11 +290,11 @@ func NewCar(owner *Player, spriteFG, spriteBG *Sprite) *Car {
 		torque:          0,
 		angularVelocity: 0,
 		angle:           0,
-		mass:            6,
-		inertia:         1 / 90.0 * 20 * 8 * 8 * 2,
+		mass:            9,
+		inertia:         1 / 250.0 * float32(math.Sqrt(float64(carSize)))*carSize*carSize*carSize/16,
 		wheels: [2]*Wheel{
-			NewWheel(Vector{0, 24}, 2),
-			NewWheel(Vector{0, -24}, 2),
+			NewWheel(Vector{0, carSize/2.0}, 400),
+			NewWheel(Vector{0, -carSize/2.0}, 400),
 		},
 		spriteFG: spriteFG,
 		spriteBG: spriteBG,
@@ -301,7 +309,7 @@ func (car *Car) Steer(steering float32) {
 }
 
 func (car *Car) SetThrottle(throttle float32, allWheel bool) {
-	torque := float32(15)
+	torque := float32(800)
 
 	if allWheel {
 		car.wheels[1].AddTransmissionTorque(throttle * torque)
@@ -311,7 +319,7 @@ func (car *Car) SetThrottle(throttle float32, allWheel bool) {
 }
 
 func (car *Car) SetBrakes(brakes float32) {
-	brakeTorque := float32(4.0)
+	brakeTorque := float32(500)
 	for _, wheel := range car.wheels {
 		wheelVel := wheel.speed
 		wheel.AddTransmissionTorque(-wheelVel * brakeTorque * brakes)
