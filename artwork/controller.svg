@@ -14,7 +14,10 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.48.3.1 r9886"
-   sodipodi:docname="New document 1">
+   sodipodi:docname="controller.svg"
+   inkscape:export-filename="/home/christoph/gopath/src/github.com/fruehwirth.marco/lecture-hall-games/data/controller.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
   <defs
      id="defs4">
     <filter
@@ -34,7 +37,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.35"
-     inkscape:cx="456.08324"
+     inkscape:cx="461.79753"
      inkscape:cy="588.16089"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
@@ -123,13 +126,13 @@
     </g>
     <path
        sodipodi:type="arc"
-       style="fill:none;stroke:#000000;stroke-width:12.30000019;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       style="fill:none;stroke:#666666;stroke-width:12.30000019000000044;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        id="path2995"
        sodipodi:cx="302.85715"
        sodipodi:cy="494.28571"
        sodipodi:rx="100"
        sodipodi:ry="100"
-       d="m 402.85715,494.28571 a 100,100 0 1 1 -200,0 100,100 0 1 1 200,0 z"
+       d="m 402.85715,494.28571 c 0,55.22847 -44.77153,100 -100,100 -55.22848,0 -100,-44.77153 -100,-100 0,-55.22848 44.77152,-100 100,-100 55.22847,0 100,44.77152 100,100 z"
        transform="translate(177.14285,18.076561)" />
     <path
        sodipodi:type="arc"
@@ -139,11 +142,11 @@
        sodipodi:cy="905"
        sodipodi:rx="95"
        sodipodi:ry="95"
-       d="m 1284.2858,905 a 95,95 0 1 1 -190,0 95,95 0 1 1 190,0 z"
+       d="m 1284.2858,905 c 0,52.46705 -42.533,95 -95,95 -52.4671,0 -95,-42.53295 -95,-95 0,-52.46705 42.5329,-95 95,-95 52.467,0 95,42.53295 95,95 z"
        transform="translate(10.714233,-122.63773)" />
     <path
        transform="translate(10.714233,-122.63773)"
-       d="m 1284.2858,905 a 95,95 0 1 1 -190,0 95,95 0 1 1 190,0 z"
+       d="m 1284.2858,905 c 0,52.46705 -42.533,95 -95,95 -52.4671,0 -95,-42.53295 -95,-95 0,-52.46705 42.5329,-95 95,-95 52.467,0 95,42.53295 95,95 z"
        sodipodi:ry="95"
        sodipodi:rx="95"
        sodipodi:cy="905"
@@ -153,7 +156,7 @@
        sodipodi:type="arc" />
     <path
        transform="translate(490.71423,-122.63773)"
-       d="m 1284.2858,905 a 95,95 0 1 1 -190,0 95,95 0 1 1 190,0 z"
+       d="m 1284.2858,905 c 0,52.46705 -42.533,95 -95,95 -52.4671,0 -95,-42.53295 -95,-95 0,-52.46705 42.5329,-95 95,-95 52.467,0 95,42.53295 95,95 z"
        sodipodi:ry="95"
        sodipodi:rx="95"
        sodipodi:cy="905"
@@ -196,7 +199,7 @@
        sodipodi:cy="494.28571"
        sodipodi:rx="100"
        sodipodi:ry="100"
-       d="m 402.85715,494.28571 a 100,100 0 1 1 -200,0 100,100 0 1 1 200,0 z"
+       d="m 402.85715,494.28571 c 0,55.22847 -44.77153,100 -100,100 -55.22848,0 -100,-44.77153 -100,-100 0,-55.22848 44.77152,-100 100,-100 55.22847,0 100,44.77152 100,100 z"
        transform="matrix(0.58571429,0,0,0.58571429,302.61224,222.85207)" />
     <text
        xml:space="preserve"
