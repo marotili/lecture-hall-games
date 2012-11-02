@@ -18,12 +18,12 @@ type Racer struct {
 	heightmap   *image.Gray
 
 	spriteCar        *Sprite
+	spriteForeground *Sprite
 	spriteBackground *Sprite
+	spriteWaiting    *Sprite
 
 	music *mixer.Music
 	font  *ttf.Font
-
-	textWaiting *sdl.Surface
 }
 
 func NewRacer() (*Racer, error) {
@@ -33,7 +33,7 @@ func NewRacer() (*Racer, error) {
 	if r.obstaclemap, err = LoadImageGray("data/velocity.png"); err != nil {
 		return nil, err
 	}
-	if r.heightmap, err = LoadImageGray("data/velocity.png"); err != nil {
+	if r.heightmap, err = LoadImageGray("data/levels/demolevel3/z.png"); err != nil {
 		return nil, err
 	}
 
@@ -41,7 +41,10 @@ func NewRacer() (*Racer, error) {
 		return nil, err
 	}
 
-	if r.spriteBackground, err = NewSprite("data/background.png", 800, 600); err != nil {
+	if r.spriteForeground, err = NewSprite("data/levels/demolevel3/foreground.png", 800, 600); err != nil {
+		return nil, err
+	}
+	if r.spriteBackground, err = NewSprite("data/levels/demolevel3/background.png", 800, 600); err != nil {
 		return nil, err
 	}
 
@@ -53,7 +56,8 @@ func NewRacer() (*Racer, error) {
 		return nil, errors.New(sdl.GetError())
 	}
 
-	r.textWaiting = ttf.RenderUTF8_Solid(r.font, "Waiting for other players...", sdl.Color{255, 0, 0, 0})
+	textWaiting := ttf.RenderUTF8_Blended(r.font, "X", sdl.Color{255, 0, 0, 0})
+	r.spriteWaiting = NewSpriteFromSurface(textWaiting)
 
 	return r, nil
 }
@@ -73,10 +77,17 @@ func (r *Racer) Render(screen *sdl.Surface) {
 
 	for _, car := range r.cars {
 		// heightMod := 1/racer.heightGraymap.Modifier(car.position)
-		car.Draw(1)
+
+		size := float32(1.0)
+		if car.owner.ButtonA {
+			size *= 2
+		} else if car.owner.ButtonB {
+			size *= 0.5
+		}
+		car.Draw(size)
 	}
 
-	screen.Blit(&sdl.Rect{100, 100, 200, 200}, r.textWaiting, nil)
+	//r.spriteForeground.Draw(400, 300, 0, 1)
 }
 
 func (r *Racer) Join(player *Player) {
