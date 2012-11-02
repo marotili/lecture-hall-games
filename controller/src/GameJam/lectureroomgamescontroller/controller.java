@@ -19,12 +19,11 @@ import android.widget.TextView;
 
 @SuppressLint("NewApi")
 public class controller extends Activity {
-	
 	private Socket client;
 	private DataOutputStream outStream;
-	private int buttonCode;
-	private TextView boundingBoxA;
 	private String serverAddress;
+	private String nickname;
+	View parentView;
 	
 	@SuppressLint({ "NewApi", "NewApi" })
 	@Override
@@ -33,70 +32,105 @@ public class controller extends Activity {
         setContentView(R.layout.controller);
         
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-
         StrictMode.setThreadPolicy(policy); 
         
         Bundle bundle = getIntent().getExtras();
        	if (bundle != null) {
        		serverAddress = bundle.getString("serverAddress");
+       		nickname = bundle.getString("nickname");
         }
         			
-        try {
-        	client = new Socket(serverAddress, 8001);
-        	outStream = new DataOutputStream(client.getOutputStream());
-        	
-        } catch(UnknownHostException exception) {
-        	exception.printStackTrace();
-        } catch(IOException exception) {
-        	exception.printStackTrace();
-        }
         
-        
-	    final TextView getCoord = (TextView) findViewById(R.id.textView1);
+        connectoToServer();
 
-	    getCoord.setOnTouchListener(new View.OnTouchListener() {
+        parentView = findViewById(R.id.entire_view);
+       
+
+	    parentView.setOnTouchListener(new View.OnTouchListener() {
 			
-			public synchronized boolean onTouch(View v, MotionEvent event) {
+			public synchronized boolean onTouch(View v, MotionEvent event) {							
+				Float joystickX = 0.0f;
+				Float joystickY = 0.0f;
+				boolean buttonA = false;
+				boolean buttonB = false;
 				
-				Float x = event.getX() / getCoord.getWidth();
-				Float y = event.getY() / getCoord.getHeight();
+				int action = event.getAction() & MotionEvent.ACTION_MASK;
 				
-				try {
-					outStream.writeFloat(x);
-					outStream.writeFloat(y);
-					outStream.writeInt(0);
-					System.out.println("X: "  + x.toString());
-					System.out.println("Y: "  + y.toString());
-				} catch (IOException e) {
-
-					e.printStackTrace();
+				int pointer = (event.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK) >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+				
+				
+				if(action != MotionEvent.ACTION_UP) {
+					for(int i = 0 ; i < event.getPointerCount() ; i++) {
+						if(action == MotionEvent.ACTION_POINTER_UP && pointer == i)
+						{
+							continue;
+						}
+						float currentX = event.getX(i) / parentView.getWidth();
+						float currentY = event.getY(i) / parentView.getHeight();
+						
+						if(currentX < 0.5 ) {
+							joystickX = currentX * 4.0f - 1.0f;
+							joystickY = currentY * 2.0f - 1.0f;
+						}
+						else if(currentX < 0.75 && currentY > 0.5) {
+							buttonB = true;
+						}
+						else if(currentY > 0.5) {
+							buttonA = true;
+						}
+						
+					} 
 				}
-				
-				
-				return true;
-			}
-		});
-
-	    boundingBoxA = (TextView) findViewById(R.id.boundingBoxA);
-	    boundingBoxA.setOnTouchListener(new View.OnTouchListener() {
-			
-			public boolean onTouch(View v, MotionEvent event) {
-				TextView middle = (TextView) findViewById(R.id.textView3);
-				middle.setText("Button A");
-				return true;
-			}
-		});
-	    
-	    TextView boundingBoxB = (TextView) findViewById(R.id.boundingBoxB);
-	    boundingBoxB.setOnTouchListener(new View.OnTouchListener() {
-			
-			public boolean onTouch(View v, MotionEvent event) {
-				TextView middle = (TextView) findViewById(R.id.textView3);
-				middle.setText("Button B");
+				//System.out.println("Input: " + joystickX + " " + joystickY + " " + buttonB + " " + buttonA);
+				writeToServer(joystickX,joystickY,buttonA,buttonB);
 				return true;
 			}
 		});
 	}
 	
-
+	@Override
+	public void onPause() {
+		super.onPause();		
+		try {
+			client.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void writeToServer(float joystickX, float joystickY, boolean buttonA, boolean buttonB) {
+		try {
+			
+			int buttonCode = 0;
+			if(buttonA) {
+				buttonCode |= 1;
+			}
+			if(buttonB) {
+				buttonCode |= 2;
+			}
+			
+			
+			outStream.writeFloat(joystickX);
+			outStream.writeFloat(joystickY);
+			outStream.writeInt(buttonCode);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void connectoToServer() {
+		try {
+	    	client = new Socket(serverAddress, 8001);
+	    	outStream = new DataOutputStream(client.getOutputStream());
+	    	
+	    	int nicknameLength = nickname.length();
+	    	
+	    	outStream.writeInt(nicknameLength);
+	    	outStream.write(nickname.getBytes());
+        } catch(UnknownHostException exception) {
+        	exception.printStackTrace();
+        } catch(IOException exception) {
+        	exception.printStackTrace();
+        }
+	}
 }

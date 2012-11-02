@@ -1,12 +1,15 @@
 package main
 
 import (
+	"github.com/0xe2-0x9a-0x9b/Go-SDL/sdl"
 	"github.com/banthar/gl"
 	"image"
+	"image/color"
 	"image/draw"
 	_ "image/png"
 	"math"
 	"os"
+	"unsafe"
 )
 
 type Vector struct {
@@ -16,7 +19,7 @@ type Vector struct {
 
 func (v Vector) Normalized() Vector {
 	length := float32(math.Sqrt(float64(v.x*v.x + v.y*v.y)))
-    return Vector{v.x / length, v.y / length}
+	return Vector{v.x / length, v.y / length}
 }
 
 func (v *Vector) Normalize() {
@@ -26,11 +29,11 @@ func (v *Vector) Normalize() {
 }
 
 func (v Vector) Length() float32 {
-    return float32(math.Sqrt(float64(v.x*v.x + v.y*v.y)))
-    }
+	return float32(math.Sqrt(float64(v.x*v.x + v.y*v.y)))
+}
 
 func (v Vector) CrossProd(v2 Vector) float32 {
-    return v.x*v2.y - v.y*v2.x
+	return v.x*v2.y - v.y*v2.x
 }
 
 func (lhs Vector) Mul(rhs Vector) float32 {
@@ -42,7 +45,7 @@ func (lhs Vector) MulScalar(rhs float32) Vector {
 }
 
 func (lhs Vector) DivScalar(rhs float32) Vector {
-    return lhs.MulScalar(1/rhs)
+	return lhs.MulScalar(1 / rhs)
 }
 
 func (lhs Vector) Add(rhs Vector) Vector {
@@ -50,17 +53,17 @@ func (lhs Vector) Add(rhs Vector) Vector {
 }
 
 func (v Vector) Rotate(angle float32) Vector {
-    return Vector{
-        (v.x*float32(math.Cos(float64(angle))) -
-        v.y*float32(math.Sin(float64(angle)))),
-        (v.x*float32(math.Sin(float64(angle))) +
-        v.y*float32(math.Cos(float64(angle)))),
-    }
+	return Vector{
+		(v.x*float32(math.Cos(float64(angle))) -
+			v.y*float32(math.Sin(float64(angle)))),
+		(v.x*float32(math.Sin(float64(angle))) +
+			v.y*float32(math.Cos(float64(angle)))),
+	}
 }
 
 func (v Vector) Project(v2 Vector) (Vector, float32) {
-    dot := v.Mul(v2)/v2.Length()
-    return v2.Normalized().MulScalar(dot), dot
+	dot := v.Mul(v2) / v2.Length()
+	return v2.Normalized().MulScalar(dot), dot
 }
 
 type Sprite struct {
@@ -70,12 +73,7 @@ type Sprite struct {
 	height float32
 }
 
-func NewSprite(path string, width, height float32) (*Sprite, error) {
-	img, err := LoadImageRGBA(path)
-	if err != nil {
-		return nil, err
-	}
-
+func uploadTexture(img *image.RGBA) gl.Texture {
 	gl.Enable(gl.TEXTURE_2D)
 	tex := gl.GenTexture()
 	tex.Bind(gl.TEXTURE_2D)
@@ -84,12 +82,47 @@ func NewSprite(path string, width, height float32) (*Sprite, error) {
 	gl.TexImage2D(gl.TEXTURE_2D, 0, 4, img.Bounds().Max.X, img.Bounds().Max.Y,
 		0, gl.RGBA, gl.UNSIGNED_BYTE, img.Pix)
 	gl.Disable(gl.TEXTURE_2D)
+	return tex
+}
 
+func NewSprite(path string, width, height float32) (*Sprite, error) {
+	img, err := LoadImageRGBA(path)
+	if err != nil {
+		return nil, err
+	}
+	tex := uploadTexture(img)
 	return &Sprite{img, tex, width, height}, nil
 }
 
-func (s *Sprite) Draw(x, y, angle, scale float32) {
+func NewSpriteFromSurface(surface *sdl.Surface) *Sprite {
+	width, height := float32(20), float32(20)
+	img := image.NewRGBA(image.Rect(0, 0, int(surface.W), int(surface.H)))
+	b := img.Bounds()
+	bpp := int(surface.Format.BytesPerPixel)
+
+	for y := b.Min.Y; y < b.Max.Y; y++ {
+		for x := b.Min.X; x < b.Max.X; x++ {
+			pixel := uintptr(unsafe.Pointer(surface.Pixels))
+			pixel += uintptr(y*int(surface.Pitch) + x*bpp)
+			p := (*color.RGBA)(unsafe.Pointer(pixel))
+			img.SetRGBA(x, y, *p)
+		}
+	}
+	tex := uploadTexture(img)
+	return &Sprite{img, tex, width, height}
+}
+
+func (s *Sprite) Draw(x, y, angle, scale float32, blend bool) {
 	gl.Enable(gl.TEXTURE_2D)
+	gl.Disable(gl.COLOR_MATERIAL)
+	if blend {
+		gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+		gl.Enable(gl.BLEND)
+	} else {
+		gl.Disable(gl.BLEND)
+		gl.BlendFunc(gl.ONE, gl.ZERO)
+	}
+
 	gl.MatrixMode(gl.MODELVIEW)
 	gl.LoadIdentity()
 	gl.Translatef(x, y, 0)
@@ -108,6 +141,7 @@ func (s *Sprite) Draw(x, y, angle, scale float32) {
 	gl.Vertex3f(-0.5*s.width, 0.5*s.height, 0)
 	gl.End()
 	gl.Disable(gl.TEXTURE_2D)
+	gl.Disable(gl.BLEND)
 }
 
 func LoadImageRGBA(path string) (*image.RGBA, error) {
