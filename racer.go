@@ -83,15 +83,7 @@ func (r *Racer) Render(screen *sdl.Surface) {
 	r.spriteBackground.Draw(screenWidth/2, screenHeight/2, 0, 1, false)
 
 	for _, car := range r.cars {
-		// heightMod := 1/racer.heightGraymap.Modifier(car.position)
-
-		size := float32(1.0)
-		size *= (1 - 0.2*valueAt(r.heightmap, car.position.x, car.position.y))
-		if car.owner.ButtonA {
-			size *= 1.5
-		} else if car.owner.ButtonB {
-			size *= 0.75
-		}
+		size := (1 - 0.2*valueAt(r.heightmap, car.position.x, car.position.y))
 		car.Draw(size)
 	}
 
