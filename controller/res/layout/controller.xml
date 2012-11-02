@@ -4,51 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
-
-    <ImageView
-        android:id="@+id/imageViewController"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/controller" />
-
-    <TextView
-        android:id="@+id/boundingBoxA"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:layout_marginRight="62dp"
-        android:text="DEBUG:A" />
-
-    <TextView
-        android:id="@+id/boundingBoxB"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/boundingBoxA"
-        android:layout_marginRight="15dp"
-        android:layout_marginTop="36dp"
-        android:layout_toLeftOf="@+id/boundingBoxA"
-        android:text="DEBUG:B" />
-
-    <TextView
-        android:id="@+id/textView3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/boundingBoxA"
-        android:layout_alignBottom="@+id/boundingBoxA"
-        android:layout_centerHorizontal="true"
-        android:text="TextView" />
-
-    <TextView
-        android:id="@+id/textView1"
-        android:layout_width="10dp"
-        android:layout_height="10dp"
-        android:layout_alignBottom="@+id/boundingBoxB"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginLeft="26dp"
-        android:background="#ff0000"
-        android:layout_toLeftOf="@+id/textView3"
-        android:text="TextView" />
+    
+        <ImageView
+            android:id="@+id/imageViewController"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:src="@drawable/controller" />
 
 </RelativeLayout>

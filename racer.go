@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/0xe2-0x9a-0x9b/Go-SDL/mixer"
 	"github.com/0xe2-0x9a-0x9b/Go-SDL/sdl"
+	"github.com/0xe2-0x9a-0x9b/Go-SDL/ttf"
 	"image"
 	"image/color"
 	"math"
@@ -20,10 +21,12 @@ type Racer struct {
 	spriteBackground *Sprite
 
 	music *mixer.Music
+	font  *ttf.Font
+
+	textWaiting *sdl.Surface
 }
 
 func NewRacer() (*Racer, error) {
-
 	r := &Racer{cars: make([]*Car, 0)}
 
 	var err error
@@ -46,6 +49,12 @@ func NewRacer() (*Racer, error) {
 		return nil, errors.New(sdl.GetError())
 	}
 
+	if r.font = ttf.OpenFont("data/font.otf", 72); r.font == nil {
+		return nil, errors.New(sdl.GetError())
+	}
+
+	r.textWaiting = ttf.RenderUTF8_Solid(r.font, "Waiting for other players...", sdl.Color{255, 0, 0, 0})
+
 	return r, nil
 }
 
@@ -55,17 +64,19 @@ func (r *Racer) Update(t time.Duration) {
 		car.position =
 			car.position.Add(car.direction.MulScalar(car.velocity * float32(t.Seconds())))
 
-		car.steer(car.owner.JoystickX*2-1, t)
+		car.steer(car.owner.JoystickX, t)
 	}
 }
 
-func (r *Racer) Render() {
+func (r *Racer) Render(screen *sdl.Surface) {
 	r.spriteBackground.Draw(400, 300, 0, 1)
 
 	for _, car := range r.cars {
 		// heightMod := 1/racer.heightGraymap.Modifier(car.position)
 		car.Draw(1)
 	}
+
+	screen.Blit(&sdl.Rect{100, 100, 200, 200}, r.textWaiting, nil)
 }
 
 func (r *Racer) Join(player *Player) {
@@ -82,11 +93,9 @@ func (r *Racer) Join(player *Player) {
 func (r *Racer) Leave(player *Player) {
 	for i := range r.cars {
 		if r.cars[i].owner == player {
-			if i < len(r.cars) {
-				r.cars = append(r.cars[:i], r.cars[i+1:]...)
-			} else {
-				r.cars = r.cars[:i-1]
-			}
+			r.cars[i] = r.cars[len(r.cars)-1]
+			r.cars = r.cars[:len(r.cars)-1]
+			break
 		}
 	}
 	if len(r.cars) == 0 {
