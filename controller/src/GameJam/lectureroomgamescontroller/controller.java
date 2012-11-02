@@ -19,7 +19,6 @@ import android.widget.TextView;
 
 @SuppressLint("NewApi")
 public class controller extends Activity {
-	
 	private Socket client;
 	private DataOutputStream outStream;
 	private String serverAddress;
@@ -41,52 +40,44 @@ public class controller extends Activity {
        		nickname = bundle.getString("nickname");
         }
         			
-        try {
-        	client = new Socket(serverAddress, 8001);
-        	outStream = new DataOutputStream(client.getOutputStream());
-        	
-        	int nicknameLength = nickname.length();
-        	
-        	outStream.writeInt(nicknameLength);
-        	outStream.write(nickname.getBytes());
-        	
-        	
-        } catch(UnknownHostException exception) {
-        	exception.printStackTrace();
-        } catch(IOException exception) {
-        	exception.printStackTrace();
-        }
         
-        
+        connectoToServer();
+
         parentView = findViewById(R.id.entire_view);
        
 
 	    parentView.setOnTouchListener(new View.OnTouchListener() {
 			
-			public synchronized boolean onTouch(View v, MotionEvent event) {			
-				Float x = event.getX();
-				Float y = event.getY();
+			public synchronized boolean onTouch(View v, MotionEvent event) {							
+				Float joystickX = 0.0f;
+				Float joystickY = 0.0f;
+				boolean buttonA = false;
+				boolean buttonB = false;
 				
-				if(event.getAction() == MotionEvent.ACTION_MOVE) {
-					int historySize = event.getHistorySize();
-					
-					for(int i = 0 ; i < historySize ; i++) {
-						float hx = event.getHistoricalX(i);
-						if(hx >  (0.5 * parentView.getWidth())) {
-							System.out.println("2nd Half");
+				int action = event.getAction() & MotionEvent.ACTION_MASK;
+				
+				if(action != MotionEvent.ACTION_UP && action != MotionEvent.ACTION_POINTER_UP) {
+					for(int i = 0 ; i < event.getPointerCount() ; i++) {
+						
+						
+						float currentX = event.getX(i) / parentView.getWidth();
+						float currentY = event.getY(i) / parentView.getHeight();
+						
+						if(currentX < 0.5 ) {
+							joystickX = currentX * 4.0f - 1.0f;
+							joystickY = currentY * 2.0f - 1.0f;
 						}
-					}
+						else if(currentX < 0.75 && currentY > 0.5) {
+							buttonB = true;
+						}
+						else if(currentY > 0.5) {
+							buttonA = true;
+						}
+						
+					} 
 				}
-				
-				if(x < parentView.getWidth()/2)
-				{
-				writeToServer((float) ( x / (0.5 * parentView.getWidth())), y / parentView.getHeight(), 0);
-					
-				if(event.getAction() == MotionEvent.ACTION_UP) {
-					writeToServer(0.0f, 0.0f, 0);
-					}
-				}
-
+				//System.out.println("Input: " + joystickX + " " + joystickY + " " + buttonB + " " + buttonA);
+				writeToServer(joystickX,joystickY,buttonA,buttonB);
 				return true;
 			}
 		});
@@ -102,14 +93,39 @@ public class controller extends Activity {
 		}
 	}
 	
-	private void writeToServer(float x_value, float y_value, int buttonCode) {
+	private void writeToServer(float joystickX, float joystickY, boolean buttonA, boolean buttonB) {
 		try {
-			outStream.writeFloat(x_value*2.0f-1.0f);
-			outStream.writeFloat(y_value*2.0f-1.0f);
+			
+			int buttonCode = 0;
+			if(buttonA) {
+				buttonCode |= 1;
+			}
+			if(buttonB) {
+				buttonCode |= 2;
+			}
+			
+			
+			outStream.writeFloat(joystickX);
+			outStream.writeFloat(joystickY);
 			outStream.writeInt(buttonCode);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
+	private void connectoToServer() {
+		try {
+	    	client = new Socket(serverAddress, 8001);
+	    	outStream = new DataOutputStream(client.getOutputStream());
+	    	
+	    	int nicknameLength = nickname.length();
+	    	
+	    	outStream.writeInt(nicknameLength);
+	    	outStream.write(nickname.getBytes());
+        } catch(UnknownHostException exception) {
+        	exception.printStackTrace();
+        } catch(IOException exception) {
+        	exception.printStackTrace();
+        }
+	}
 }
