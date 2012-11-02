@@ -73,7 +73,7 @@ func (r *Racer) Update(t time.Duration) {
 }
 
 func (r *Racer) Render(screen *sdl.Surface) {
-	r.spriteBackground.Draw(400, 300, 0, 1)
+	r.spriteBackground.Draw(400, 300, 0, 1,false)
 
 	for _, car := range r.cars {
 		// heightMod := 1/racer.heightGraymap.Modifier(car.position)
@@ -87,7 +87,7 @@ func (r *Racer) Render(screen *sdl.Surface) {
 		car.Draw(size)
 	}
 
-	//r.spriteForeground.Draw(400, 300, 0, 1)
+	r.spriteForeground.Draw(400, 300, 0, 1,true)
 }
 
 func (r *Racer) Join(player *Player) {
@@ -129,7 +129,7 @@ type Car struct {
 func (car *Car) Draw(heightMod float32) {
 	angle := math.Pi/2.0 + math.Atan2(float64(car.direction.y), float64(car.direction.x))
 	car.sprite.Draw(float32(car.position.x), float32(car.position.y),
-		float32(angle), heightMod)
+		float32(angle), heightMod,false)
 }
 
 func NewCar(owner *Player, sprite *Sprite) *Car {
