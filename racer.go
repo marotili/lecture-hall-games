@@ -18,6 +18,7 @@ type Racer struct {
 	heightmap   *image.Gray
 
 	spriteCar        *Sprite
+	spriteForeground *Sprite
 	spriteBackground *Sprite
 	spriteWaiting    *Sprite
 
@@ -32,7 +33,7 @@ func NewRacer() (*Racer, error) {
 	if r.obstaclemap, err = LoadImageGray("data/velocity.png"); err != nil {
 		return nil, err
 	}
-	if r.heightmap, err = LoadImageGray("data/velocity.png"); err != nil {
+	if r.heightmap, err = LoadImageGray("data/levels/demolevel3/z.png"); err != nil {
 		return nil, err
 	}
 
@@ -40,7 +41,10 @@ func NewRacer() (*Racer, error) {
 		return nil, err
 	}
 
-	if r.spriteBackground, err = NewSprite("data/background.png", 800, 600); err != nil {
+	if r.spriteForeground, err = NewSprite("data/levels/demolevel3/foreground.png", 800, 600); err != nil {
+		return nil, err
+	}
+	if r.spriteBackground, err = NewSprite("data/levels/demolevel3/background.png", 800, 600); err != nil {
 		return nil, err
 	}
 
@@ -83,7 +87,7 @@ func (r *Racer) Render(screen *sdl.Surface) {
 		car.Draw(size)
 	}
 
-	r.spriteWaiting.Draw(100, 100, 0, 5)
+	//r.spriteForeground.Draw(400, 300, 0, 1)
 }
 
 func (r *Racer) Join(player *Player) {
