@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-const basePkg = "lecture-hall-games"
+const basePkg = "github.com/fruehwirth.marco/lecture-hall-games"
 
 type Player struct {
 	Conn      net.Conn
@@ -36,12 +36,12 @@ type Game interface {
 func handleConnection(conn net.Conn) {
 	player := &Player{Conn: conn, JoystickX: 0.5, JoystickY: 0.5}
 	defer func() {
-		log.Printf("Pleayer left (%s)\n", conn.RemoteAddr())
+		log.Printf("Player left (%s)\n", conn.RemoteAddr())
 		mu.Lock()
 		game.Leave(player)
 		mu.Unlock()
 	}()
-	log.Printf("Pleayer joined (%s)\n", conn.RemoteAddr())
+	log.Printf("Player joined (%s)\n", conn.RemoteAddr())
 	mu.Lock()
 	game.Join(player)
 	mu.Unlock()
