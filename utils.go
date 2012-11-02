@@ -80,9 +80,18 @@ func NewSpriteFromSurface(surface *sdl.Surface) *Sprite {
 	tex := uploadTexture(img)
 	return &Sprite{img, tex, width, height}
 }
-
-func (s *Sprite) Draw(x, y, angle, scale float32) {
+ 	
+func (s *Sprite) Draw(x, y, angle, scale float32, blend bool) {
 	gl.Enable(gl.TEXTURE_2D)
+
+	gl.Enable(gl.BLEND)
+	gl.Disable(gl.COLOR_MATERIAL)
+	if blend {
+		gl.BlendFunc(gl.ONE,gl.ZERO)
+	} else {
+		gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+	}
+
 	gl.MatrixMode(gl.MODELVIEW)
 	gl.LoadIdentity()
 	gl.Translatef(x, y, 0)
@@ -101,6 +110,7 @@ func (s *Sprite) Draw(x, y, angle, scale float32) {
 	gl.Vertex3f(-0.5*s.width, 0.5*s.height, 0)
 	gl.End()
 	gl.Disable(gl.TEXTURE_2D)
+	gl.Disable(gl.BLEND)
 }
 
 func LoadImageRGBA(path string) (*image.RGBA, error) {
