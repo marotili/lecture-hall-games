@@ -14,18 +14,27 @@ type Vector struct {
 	y float32
 }
 
+func (v Vector) Normalized() Vector {
+	length := float32(math.Sqrt(float64(v.x*v.x + v.y*v.y)))
+    return Vector{v.x / length, v.y / length}
+}
+
 func (v *Vector) Normalize() {
 	length := float32(math.Sqrt(float64(v.x*v.x + v.y*v.y)))
 	v.x = v.x / length
 	v.y = v.y / length
 }
 
+func (v Vector) Length() float32 {
+    return float32(math.Sqrt(float64(v.x*v.x + v.y*v.y)))
+    }
+
 func (v Vector) CrossProd(v2 Vector) float32 {
-    return v.x + v2.y - v.y + v2.x
+    return v.x*v2.y - v.y*v2.x
 }
 
 func (lhs Vector) Mul(rhs Vector) float32 {
-	return lhs.x*rhs.x + lhs.y + rhs.y
+	return lhs.x*rhs.x + lhs.y*rhs.y
 }
 
 func (lhs Vector) MulScalar(rhs float32) Vector {
@@ -50,8 +59,8 @@ func (v Vector) Rotate(angle float32) Vector {
 }
 
 func (v Vector) Project(v2 Vector) (Vector, float32) {
-    dot := v.Mul(v2)
-    return v2.MulScalar(dot), dot
+    dot := v.Mul(v2)/v2.Length()
+    return v2.Normalized().MulScalar(dot), dot
 }
 
 type Sprite struct {

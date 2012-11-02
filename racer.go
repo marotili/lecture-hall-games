@@ -1,7 +1,7 @@
 package main
 
 import (
-    "log"
+    "math"
 	"errors"
 	"github.com/0xe2-0x9a-0x9b/Go-SDL/mixer"
 	"github.com/0xe2-0x9a-0x9b/Go-SDL/sdl"
@@ -100,24 +100,23 @@ type Wheel struct {
 }
 
 func NewWheel(position Vector, radius float32) *Wheel {
-    return &Wheel{
+    wheel := &Wheel{
         torque:0,
         speed:0,
         radius:radius,
         inertia:radius*radius,//fake
         position:position,
        }
+    wheel.SetSteeringAngle(0)
+    return wheel
 }
 
 func (w *Wheel) SetSteeringAngle(newAngle float32) {
     forward := Vector{0,1}
     side := Vector{-1,0}
 
-    forward.Rotate(newAngle)
-    side.Rotate(newAngle)
-
-    w.forwardAxis = forward
-    w.sideAxis = side
+    w.forwardAxis = forward.Rotate(newAngle)
+    w.sideAxis = side.Rotate(newAngle)
 }
 
 func (w *Wheel) AddTransmissionTorque(newValue float32) {
@@ -126,6 +125,7 @@ func (w *Wheel) AddTransmissionTorque(newValue float32) {
 
 func (w *Wheel) CalculateForce(relativeGroundSpeed Vector, tDur time.Duration) Vector {
     t := float32(tDur) * timeFactor
+
     patchSpeed := w.forwardAxis.MulScalar(-w.speed*w.radius)
     velDiff := relativeGroundSpeed.Add(patchSpeed)
     sideVel, _ := velDiff.Project(w.sideAxis)
@@ -166,8 +166,6 @@ type Car struct {
 
 func (car *Car) AddForce(force Vector, relOffset Vector) {
     car.force = car.force.Add(force)
-    log.Printf("(%f, %f) -> %f", relOffset.x, relOffset.y,
-    car.force.CrossProd(relOffset))
     car.torque += car.force.CrossProd(relOffset)
 }
 
@@ -185,10 +183,12 @@ func (car *Car)PointVel(offset Vector) Vector {
 }
 
 func (car *Car) Update(time time.Duration) {
-    t := float32(time)*timeFactor*0.01
+    t := float32(time)*timeFactor
 
-    car.SetThrottle(-(car.owner.JoystickY*2-1), true)
-    car.Steer(car.owner.JoystickX*2-1, time)
+    car.SetThrottle(car.owner.JoystickY*2-1, false)
+
+    car.Steer(car.owner.JoystickX*2-1)
+//    car.Steer(car.owner.JoystickX*2-1, time)
 
     for _, wheel := range(car.wheels) {
         worldWheelOffset := car.RelativeToWorld(wheel.position)
@@ -198,18 +198,13 @@ func (car *Car) Update(time time.Duration) {
         worldResponseForce := car.RelativeToWorld(relResponseForce)
 
         car.AddForce(worldResponseForce, worldWheelOffset)
-
     }
 
     acceleration := car.force.DivScalar(car.mass)
     car.velocity = car.velocity.Add(acceleration.MulScalar(t))
     car.position = car.position.Add(car.velocity.MulScalar(t))
 
-    log.Printf("%f", car.force)
-    log.Printf("%f", car.velocity)
-    log.Printf("%f", car.position)
-
-    angAcc := car.torque
+    angAcc := car.torque / car.inertia
     car.angularVelocity += angAcc * t
     car.angle += car.angularVelocity * t
 
@@ -235,28 +230,27 @@ func NewCar(owner *Player, sprite *Sprite) *Car {
         torque:0,
         angularVelocity:0,
         angle:0,
-        mass:1,
-        inertia:1,
+        mass:6,
+        inertia:1/24.0*20*8*8*24*24,
         wheels:[4]*Wheel{
-            NewWheel(Vector{8,24}, 0.5),
-            NewWheel(Vector{-8,24}, 0.5),
-            NewWheel(Vector{8,-24}, 0.5),
-            NewWheel(Vector{-8,-24}, 0.5),
+            NewWheel(Vector{-8,24}, 2),
+            NewWheel(Vector{8,24}, 2),
+            NewWheel(Vector{8,-24}, 2),
+            NewWheel(Vector{-8,-24}, 2),
         },
 	}
 }
 
 var timeFactor float32 = 0.00000001
 
-func (car *Car) Steer(steering float32, elapsedTime time.Duration) {
-    steeringLock := float32(0.75)
+func (car *Car) Steer(steering float32) {
+    steeringLock := float32(math.Pi/2)
     car.wheels[0].SetSteeringAngle(-steering*steeringLock)
     car.wheels[1].SetSteeringAngle(-steering*steeringLock)
 }
 
 func (car *Car) SetThrottle(throttle float32, allWheel bool) {
-    torque := float32(20)
-
+    torque := float32(40)
 
     if allWheel {
         car.wheels[0].AddTransmissionTorque(throttle*torque)
