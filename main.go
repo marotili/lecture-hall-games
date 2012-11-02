@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"github.com/0xe2-0x9a-0x9b/Go-SDL/mixer"
 	"github.com/0xe2-0x9a-0x9b/Go-SDL/sdl"
+	"github.com/0xe2-0x9a-0x9b/Go-SDL/ttf"
 	"github.com/banthar/gl"
 	"go/build"
 	"io"
@@ -20,6 +21,7 @@ const basePkg = "github.com/fruehwirth.marco/lecture-hall-games"
 
 type Player struct {
 	Conn      net.Conn
+	Nick      string
 	ButtonA   bool
 	ButtonB   bool
 	JoystickX float32
@@ -28,23 +30,32 @@ type Player struct {
 
 type Game interface {
 	Update(t time.Duration)
-	Render()
+	Render(screen *sdl.Surface)
 	Join(player *Player)
 	Leave(player *Player)
 }
 
 func handleConnection(conn net.Conn) {
-	player := &Player{Conn: conn, JoystickX: 0.5, JoystickY: 0.5}
+	player := &Player{Conn: conn}
 	defer func() {
-		log.Printf("Player left (%s)\n", conn.RemoteAddr())
+		log.Printf("Player %q left (%s)\n", player.Nick, conn.RemoteAddr())
 		mu.Lock()
 		game.Leave(player)
 		mu.Unlock()
 	}()
-	log.Printf("Player joined (%s)\n", conn.RemoteAddr())
 	mu.Lock()
 	game.Join(player)
 	mu.Unlock()
+
+	var nickLength uint32
+	binary.Read(conn, binary.BigEndian, &nickLength)
+	nickBytes := make([]byte, nickLength)
+	if _, err := io.ReadFull(conn, nickBytes); err != nil {
+		log.Println(err)
+		return
+	}
+	player.Nick = string(nickBytes)
+	log.Printf("Player %q joined (%s)\n", player.Nick, conn.RemoteAddr())
 
 	buf := make([]byte, 12)
 	for {
@@ -60,13 +71,13 @@ func handleConnection(conn net.Conn) {
 		buttons := binary.BigEndian.Uint32(buf[8:])
 		player.ButtonA = buttons&1 != 0
 		player.ButtonB = buttons&2 != 0
-		if player.JoystickX < 0 {
-			player.JoystickX = 0
+		if player.JoystickX < -1 {
+			player.JoystickX = -1
 		} else if player.JoystickX > 1 {
 			player.JoystickX = 1
 		}
-		if player.JoystickY < 0 {
-			player.JoystickY = 0
+		if player.JoystickY < -1 {
+			player.JoystickY = 1
 		} else if player.JoystickY > 1 {
 			player.JoystickY = 1
 		}
@@ -103,6 +114,10 @@ func main() {
 
 	if mixer.OpenAudio(mixer.DEFAULT_FREQUENCY, mixer.DEFAULT_FORMAT,
 		mixer.DEFAULT_CHANNELS, 4096) != 0 {
+		log.Fatal(sdl.GetError())
+	}
+
+	if ttf.Init() != 0 {
 		log.Fatal(sdl.GetError())
 	}
 
@@ -151,7 +166,7 @@ func main() {
 
 		mu.Lock()
 		game.Update(t)
-		game.Render()
+		game.Render(screen)
 		mu.Unlock()
 
 		sdl.GL_SwapBuffers()
