@@ -2,102 +2,94 @@ package main
 
 import (
 	"encoding/binary"
-	"fmt"
-	"github.com/0xe2-0x9a-0x9b/Go-SDL/sdl"
 	"github.com/0xe2-0x9a-0x9b/Go-SDL/mixer"
+	"github.com/0xe2-0x9a-0x9b/Go-SDL/sdl"
 	"github.com/banthar/gl"
 	"io"
 	"log"
 	"math"
-	"math/rand"
 	"net"
 	"runtime"
 	"sync"
 	"time"
 )
 
-type Game interface {
-	Run()
+type Player struct {
+	Conn      net.Conn
+	ButtonA   bool
+	ButtonB   bool
+	JoystickX float32
+	JoystickY float32
 }
 
-const (
-	ButtonA = 1
-	ButtonB = 2
-)
-
-var mu sync.Mutex
+type Game interface {
+	Update(t time.Duration)
+	Render()
+	Join(player *Player)
+	Leave(player *Player)
+}
 
 func handleConnection(conn net.Conn) {
-	car := NewCar(Player{"blub"}, sprite)
+	player := &Player{Conn: conn, JoystickX: 0.5, JoystickY: 0.5}
 	defer func() {
-		log.Println("client disconnected")
+		log.Printf("Pleayer left (%s)\n", conn.RemoteAddr())
 		mu.Lock()
-		for i := range racer.cars {
-			if racer.cars[i] == car {
-				racer.cars = append(racer.cars[:i], racer.cars[i+1:]...)
-			}
-		}
+		game.Leave(player)
 		mu.Unlock()
-		conn.Close()
 	}()
-	log.Println("client connected")
-	car.position.x = 200
-	car.position.y = 200
-
+	log.Printf("Pleayer joined (%s)\n", conn.RemoteAddr())
 	mu.Lock()
-	racer.cars = append(racer.cars, car)
+	game.Join(player)
 	mu.Unlock()
 
 	buf := make([]byte, 12)
 	for {
 		if _, err := io.ReadFull(conn, buf); err != nil {
-			log.Println(err)
+			if err != io.EOF {
+				log.Println(err)
+			}
 			return
 		}
-		joyX := math.Float32frombits(binary.BigEndian.Uint32(buf))
-		joyY := math.Float32frombits(binary.BigEndian.Uint32(buf[4:]))
-		buttons := binary.BigEndian.Uint32(buf[8:])
-		fmt.Println(joyX, joyY, buttons)
-
-		if joyX < 0 {
-			joyX = 0
-		} else if joyX > 1 {
-			joyX = 1
-		}
 		mu.Lock()
-		car.steerValue = joyX*2 - 1
+		player.JoystickX = math.Float32frombits(binary.BigEndian.Uint32(buf))
+		player.JoystickY = math.Float32frombits(binary.BigEndian.Uint32(buf[4:]))
+		buttons := binary.BigEndian.Uint32(buf[8:])
+		player.ButtonA = buttons&1 != 0
+		player.ButtonB = buttons&2 != 0
+		if player.JoystickX < 0 {
+			player.JoystickX = 0
+		} else if player.JoystickX > 1 {
+			player.JoystickX = 1
+		}
+		if player.JoystickY < 0 {
+			player.JoystickY = 0
+		} else if player.JoystickY > 1 {
+			player.JoystickY = 1
+		}
 		mu.Unlock()
 	}
 }
 
-func drawTexture() {
-
-}
-
-var racer = NewRacer()
-var sprite *Sprite
+var (
+	game Game
+	mu   sync.Mutex
+)
 
 func main() {
-	log.SetFlags(0)
 	runtime.LockOSThread()
 
 	if sdl.Init(sdl.INIT_EVERYTHING) != 0 {
 		log.Fatal(sdl.GetError())
 	}
-
 	var screen = sdl.SetVideoMode(800, 600, 32, sdl.OPENGL)
 	if screen == nil {
 		log.Fatal(sdl.GetError())
 	}
-
-	sdl.WM_SetCaption("Lecture Hall Games 0.1", "")
+	sdl.WM_SetCaption("Lecture Hall Games", "")
 	sdl.EnableUNICODE(1)
-
 	if gl.Init() != 0 {
-		panic("gl error")
-
+		log.Fatal("could not initialize OpenGL")
 	}
-
 	gl.Viewport(0, 0, int(screen.W), int(screen.H))
 	gl.ClearColor(1, 1, 1, 0)
 	gl.Clear(gl.COLOR_BUFFER_BIT)
@@ -105,54 +97,34 @@ func main() {
 	gl.LoadIdentity()
 	gl.Ortho(0, float64(screen.W), float64(screen.H), 0, -1.0, 1.0)
 
-	rand.Seed(time.Now().UnixNano())
+	if mixer.OpenAudio(mixer.DEFAULT_FREQUENCY, mixer.DEFAULT_FORMAT,
+		mixer.DEFAULT_CHANNELS, 4096) != 0 {
+		log.Fatal(sdl.GetError())
+	}
 
-	sdl.EnableUNICODE(1)
+	var err error
+	if game, err = NewRacer(); err != nil {
+		log.Fatal(err)
+	}
 
 	go func() {
-		ln, err := net.Listen("tcp", ":8001")
+		listen, err := net.Listen("tcp", ":8001")
 		if err != nil {
-			log.Fatal("Server failed")
+			log.Fatal(err)
 		}
-
 		for {
-			conn, err := ln.Accept()
+			conn, err := listen.Accept()
 			if err != nil {
-				log.Fatal("Client failed")
+				log.Println(err)
 				continue
 			}
-
 			go handleConnection(conn)
 		}
 	}()
 
 	running := true
 	last := time.Now()
-
-	width := 16
-	sprite = NewSprite("artwork/auto.png", width, width*3)
-	background := NewSprite("artwork/background.png", 800, 600)
-
-    if mixer.OpenAudio(mixer.DEFAULT_FREQUENCY, mixer.DEFAULT_FORMAT,
-        mixer.DEFAULT_CHANNELS, 4096) != 0 {
-            log.Fatal(sdl.GetError())
-        }
-
-    music := mixer.LoadMUS("artwork/music.ogg")
-
-    if music == nil {
-        log.Fatal(sdl.GetError())
-    }
-
-    music.PlayMusic(-1)
-
 	for running {
-		// move objects
-		current := time.Now()
-		t := current.Sub(last)
-		last = current
-
-		// process events
 		select {
 		case event := <-sdl.Events:
 			switch e := event.(type) {
@@ -165,23 +137,17 @@ func main() {
 		default:
 		}
 
+		current := time.Now()
+		t := current.Sub(last)
+		last = current
+
 		mu.Lock()
-		for i := range racer.cars {
-			racer.cars[i].steer(racer.cars[i].steerValue, t)
-		}
+		game.Update(t)
+		game.Render()
 		mu.Unlock()
-
-		gl.ClearColor(1, 1, 1, 0)
-		gl.Clear(gl.COLOR_BUFFER_BIT)
-
-		racer.Update(t)
-		background.Draw(400, 300, 0, 1)
-		racer.Render()
 
 		sdl.GL_SwapBuffers()
 	}
-
-    music.Free()
 
 	sdl.Quit()
 }

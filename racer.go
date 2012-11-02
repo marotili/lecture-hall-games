@@ -1,40 +1,97 @@
 package main
 
 import (
-	"github.com/banthar/gl"
+	"errors"
+	"github.com/0xe2-0x9a-0x9b/Go-SDL/mixer"
+	"github.com/0xe2-0x9a-0x9b/Go-SDL/sdl"
 	"image"
 	"image/color"
-	"image/png"
 	"math"
-	"os"
 	"time"
 )
 
-type Vector struct {
-	x float32
-	y float32
+type Racer struct {
+	cars []*Car
+
+	obstaclemap *image.Gray
+	heightmap   *image.Gray
+
+	spriteCar        *Sprite
+	spriteBackground *Sprite
+
+	music *mixer.Music
 }
 
-func (v *Vector) Normalize() {
-	length := float32(math.Sqrt(float64(v.x*v.x + v.y*v.y)))
-	v.x = v.x / length
-	v.y = v.y / length
+func NewRacer() (*Racer, error) {
+
+	r := &Racer{cars: make([]*Car, 0)}
+
+	var err error
+	if r.obstaclemap, err = LoadImageGray("data/velocity.png"); err != nil {
+		return nil, err
+	}
+	if r.heightmap, err = LoadImageGray("data/velocity.png"); err != nil {
+		return nil, err
+	}
+
+	if r.spriteCar, err = NewSprite("data/car.png", 16, 48); err != nil {
+		return nil, err
+	}
+
+	if r.spriteBackground, err = NewSprite("data/background.png", 800, 600); err != nil {
+		return nil, err
+	}
+
+	if r.music = mixer.LoadMUS("data/music.ogg"); r.music == nil {
+		return nil, errors.New(sdl.GetError())
+	}
+
+	return r, nil
 }
 
-func (lhs Vector) Mul(rhs Vector) float32 {
-	return lhs.x*rhs.x + lhs.y + rhs.y
+func (r *Racer) Update(t time.Duration) {
+	for _, car := range r.cars {
+		car.velocity = car.maxVelocity * float32(r.obstaclemap.At(int(car.position.x), int(car.position.y)).(color.Gray).Y) / 255
+		car.position =
+			car.position.Add(car.direction.MulScalar(car.velocity * float32(t.Seconds())))
+
+		car.steer(car.owner.JoystickX*2-1, t)
+	}
 }
 
-func (lhs Vector) MulScalar(rhs float32) Vector {
-	return Vector{lhs.x * rhs, lhs.y * rhs}
+func (r *Racer) Render() {
+	r.spriteBackground.Draw(400, 300, 0, 1)
+
+	for _, car := range r.cars {
+		// heightMod := 1/racer.heightGraymap.Modifier(car.position)
+		car.Draw(1)
+	}
 }
 
-func (lhs Vector) Add(rhs Vector) Vector {
-	return Vector{lhs.x + rhs.x, lhs.y + rhs.y}
+func (r *Racer) Join(player *Player) {
+	if len(r.cars) == 0 {
+		mixer.ResumeMusic()
+		r.music.PlayMusic(-1)
+	}
+	car := NewCar(player, r.spriteCar)
+	car.position.x = 200
+	car.position.y = 200
+	r.cars = append(r.cars, car)
 }
 
-type Player struct {
-	name string
+func (r *Racer) Leave(player *Player) {
+	for i := range r.cars {
+		if r.cars[i].owner == player {
+			if i < len(r.cars) {
+				r.cars = append(r.cars[:i], r.cars[i+1:]...)
+			} else {
+				r.cars = r.cars[:i-1]
+			}
+		}
+	}
+	if len(r.cars) == 0 {
+		mixer.PauseMusic()
+	}
 }
 
 type Car struct {
@@ -44,7 +101,7 @@ type Car struct {
 	velocity    float32
 	zLevel      int
 	layer       int
-	owner       Player
+	owner       *Player
 	sprite      *Sprite
 	steerValue  float32
 }
@@ -55,89 +112,11 @@ func (car *Car) Draw(heightMod float32) {
 		float32(angle), heightMod)
 }
 
-type Sprite struct {
-	filename string
-	width    int
-	height   int
-	texture  gl.Texture
-}
-
-func NewSprite(filename string, width, height int) *Sprite {
-	fi, _ := os.Open(filename)
-	img, _ := png.Decode(fi)
-
-	gl.Enable(gl.TEXTURE_2D)
-	texture := gl.GenTexture()
-	texture.Bind(gl.TEXTURE_2D)
-
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-	gl.TexImage2D(gl.TEXTURE_2D, 0, 4, img.Bounds().Max.X, img.Bounds().Max.Y, 0, gl.RGBA, gl.UNSIGNED_BYTE,
-		(img.(*image.RGBA)).Pix)
-	gl.Disable(gl.TEXTURE_2D)
-
-	return &Sprite{
-		filename: filename,
-		width:    width,
-		height:   height,
-		texture:  texture,
-	}
-}
-
-func (sprite *Sprite) Draw(x, y, angle, scale float32) {
-	gl.Enable(gl.TEXTURE_2D)
-	gl.MatrixMode(gl.MODELVIEW)
-	gl.LoadIdentity()
-	gl.Translatef(x, y, 0)
-	gl.Rotatef(angle*360/(2*math.Pi), 0, 0, 1)
-	gl.Scalef(scale, scale, 1)
-	sprite.texture.Bind(gl.TEXTURE_2D)
-	gl.Begin(gl.QUADS)
-	gl.Color3f(1, 1, 1)
-	gl.TexCoord2d(0, 0)
-	gl.Vertex3f(-float32(sprite.width/2), -float32(sprite.height/2), 0)
-	gl.TexCoord2d(1, 0)
-	gl.Vertex2f(float32(sprite.width/2), -float32(sprite.height/2))
-	gl.TexCoord2d(1, 1)
-	gl.Vertex3f(float32(sprite.width/2), float32(sprite.height/2), 0)
-	gl.TexCoord2d(0, 1)
-	gl.Vertex3f(-float32(sprite.width/2), float32(sprite.height/2), 0)
-	gl.End()
-	gl.Disable(gl.TEXTURE_2D)
-}
-
-type Graymap struct {
-	data *image.Gray
-}
-
-func (graymap Graymap) Modifier(pos Vector) float32 {
-	color := graymap.data.At(int(pos.x), int(pos.y)).(color.Gray)
-	return float32(color.Y) / float32(255)
-}
-
-type Racer struct {
-	cars            []*Car
-	boundingRects   []Vector // stub
-	velocityGraymap Graymap
-	heightGraymap   Graymap
-}
-
-func NewRacer() *Racer {
-	fi, _ := os.Open("artwork/velocity.png")
-	img, _ := png.Decode(fi)
-	return &Racer{
-		cars:            nil,
-		boundingRects:   nil,
-		velocityGraymap: Graymap{(img.(*image.Gray))},
-		heightGraymap:   Graymap{(img.(*image.Gray))},
-	}
-}
-
-func NewCar(owner Player, sprite *Sprite) *Car {
+func NewCar(owner *Player, sprite *Sprite) *Car {
 	return &Car{
 		position:    Vector{0, 0},
 		direction:   Vector{0, 1},
-		maxVelocity: 10,
+		maxVelocity: 100,
 		velocity:    10,
 		zLevel:      0,
 		layer:       0,
@@ -159,23 +138,4 @@ func (car *Car) steer(power float32, elapsedTime time.Duration) {
 			car.direction.y*float32(math.Cos(float64(max_angle*power*float32(elapsedTime)*timeFactor)))
 
 	car.direction.Normalize()
-}
-
-func (racer *Racer) Update(elapsedTime time.Duration) {
-	for _, car := range racer.cars {
-		car.velocity =
-			car.maxVelocity * racer.velocityGraymap.Modifier(car.position)
-		car.position =
-			car.position.Add(car.direction.MulScalar(car.velocity * (float32(elapsedTime)) * timeFactor))
-	}
-}
-
-func (racer *Racer) Render() {
-	for _, car := range racer.cars {
-		// heightMod := 1/racer.heightGraymap.Modifier(car.position)
-		car.Draw(1)
-	}
-	// background layer
-	// map layers
-	// cars
 }
