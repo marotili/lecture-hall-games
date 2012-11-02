@@ -7,9 +7,8 @@ import (
 	"github.com/0xe2-0x9a-0x9b/Go-SDL/ttf"
 	"image"
 	"image/color"
-	"math"
-	"time"
 	"path/filepath"
+	"time"
 )
 
 type Racer struct {
@@ -35,10 +34,10 @@ func NewRacer(levelDir string) (*Racer, error) {
 	r := &Racer{cars: make([]*Car, 0)}
 
 	var err error
-	if r.obstaclemap, err = LoadImageGray(filepath.Join(levelDir,"velocity.png")); err != nil {
+	if r.obstaclemap, err = LoadImageGray(filepath.Join(levelDir, "velocity.png")); err != nil {
 		return nil, err
 	}
-	if r.heightmap, err = LoadImageGray(filepath.Join(levelDir,"z.png")); err != nil {
+	if r.heightmap, err = LoadImageGray(filepath.Join(levelDir, "z.png")); err != nil {
 		return nil, err
 	}
 
@@ -50,7 +49,7 @@ func NewRacer(levelDir string) (*Racer, error) {
 		return nil, err
 	}
 
-	if r.spriteForeground, err = NewSprite(filepath.Join(levelDir,"foreground.png"), screenWidth, screenHeight); err != nil {
+	if r.spriteForeground, err = NewSprite(filepath.Join(levelDir, "foreground.png"), screenWidth, screenHeight); err != nil {
 		return nil, err
 	}
 	if r.spriteBackground, err = NewSprite(filepath.Join(levelDir, "background.png"), screenWidth, screenHeight); err != nil {
@@ -255,6 +254,7 @@ func (car *Car) Update(time time.Duration) {
 	car.velocity = car.velocity.Add(acceleration.MulScalar(t))
 	car.position = car.position.Add(car.velocity.MulScalar(t))
 
+	car.angularVelocity *= (0.99 * t)
 	angAcc := car.torque / car.inertia
 	car.angularVelocity += angAcc * t
 	car.angle += car.angularVelocity * t
@@ -283,7 +283,7 @@ func NewCar(owner *Player, spriteFG, spriteBG *Sprite) *Car {
 		angularVelocity: 0,
 		angle:           0,
 		mass:            6,
-		inertia:         1 / 24.0 * 20 * 8 * 8 * 24 * 24,
+		inertia:         1 / 90.0 * 20 * 8 * 8 * 2,
 		wheels: [2]*Wheel{
 			NewWheel(Vector{0, 24}, 2),
 			NewWheel(Vector{0, -24}, 2),
@@ -296,12 +296,12 @@ func NewCar(owner *Player, spriteFG, spriteBG *Sprite) *Car {
 var timeFactor float32 = 0.00000001
 
 func (car *Car) Steer(steering float32) {
-	steeringLock := float32(math.Pi / 2)
+	steeringLock := float32(0.75)
 	car.wheels[1].SetSteeringAngle(-steering * steeringLock)
 }
 
 func (car *Car) SetThrottle(throttle float32, allWheel bool) {
-	torque := float32(5)
+	torque := float32(15)
 
 	if allWheel {
 		car.wheels[1].AddTransmissionTorque(throttle * torque)
