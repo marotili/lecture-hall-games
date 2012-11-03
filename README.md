@@ -7,6 +7,9 @@ of players. Each player needs to a) be able to see the screen (a video
 projector is preferable) and b) a custom android app that connects over Wifi
 and acts as controller.
 
+Download Android client (controller):  
+http://www.tux21b.org/public/LectureHallGamesController.apk
+
 Authors
 -------
 
