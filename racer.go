@@ -43,7 +43,7 @@ func NewRacer(levelDir string) (*Racer, error) {
 		return nil, err
 	}
 
-	carSize := 0.04 * float32(screenWidth)
+	carSize := 0.02 * float32(screenWidth)
 	if r.spriteCarFG, err = NewSprite("data/cars/car1/fg.png", carSize, carSize); err != nil {
 		return nil, err
 	}
@@ -243,7 +243,7 @@ func (car *Car) Update(time time.Duration) {
 		car.SetThrottle(0, false)
 	}
 	if car.owner.ButtonB {
-		car.SetBrakes(1)
+		car.SetThrottle(-0.8, false)
 	} else {
 		car.SetBrakes(0)
 	}
@@ -300,7 +300,7 @@ func NewCar(owner *Player, spriteFG, spriteBG *Sprite, carSize float32) *Car {
 		spriteBG: spriteBG,
 		size:     carSize,
 		width:    carSize * 18 / 32.0,
-        height: carSize * 30/32.0,
+        height: carSize * 1,
 	}
 }
 

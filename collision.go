@@ -81,8 +81,8 @@ func col(car *Car, car2 *Car) {
         {c2Lines[3], c2Lines[0]},
     }
 
-    for i, c1Line := range(c1Lines) {
-        for j, linePair := range(linePairs) {
+    for _, c1Line := range(c1Lines) {
+        for _, linePair := range(linePairs) {
             c2Line := linePair[0]
 
             if math.Abs(float64(c1Line[0] - c2Line[0])) < 0.001 {
@@ -123,8 +123,8 @@ func col(car *Car, car2 *Car) {
                 car1AngVel := car.angularVelocity
                 car2AngVel := car2.angularVelocity
 
-                car.force = car.force.MulScalar(-1)
-                car2.force = car.force.MulScalar(-1)
+                car.force = car.force.MulScalar(-2)
+                car2.force = car.force.MulScalar(-2)
                 car.velocity = car2Vel
                 car2.velocity = car1Vel
 

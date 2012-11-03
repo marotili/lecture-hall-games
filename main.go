@@ -57,9 +57,7 @@ func handleConnection(conn net.Conn) {
 		game.Leave(player)
 		mu.Unlock()
 	}()
-    player2 := &Player{Conn: conn}
 	mu.Lock()
-    game.Join(player2, 300, 300)
 	game.Join(player, 200, 200)
 	mu.Unlock()
 
