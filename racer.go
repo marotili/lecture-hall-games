@@ -290,8 +290,8 @@ func NewCar(owner *Player, spriteFG, spriteBG *Sprite, carSize float32) *Car {
 		torque:          0,
 		angularVelocity: 0,
 		angle:           0,
-		mass:            5,
-		inertia:         300,
+		mass:            3,
+		inertia:         600,
 		wheels: [2]*Wheel{
 			NewWheel(Vector{0, carSize / 2.0}, 4),
 			NewWheel(Vector{0, -carSize / 2.0}, 4),
