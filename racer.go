@@ -1,7 +1,6 @@
 package main
 
 import (
-"log"
 	"errors"
 	"github.com/0xe2-0x9a-0x9b/Go-SDL/mixer"
 	"github.com/0xe2-0x9a-0x9b/Go-SDL/sdl"
@@ -15,7 +14,7 @@ import (
 type Racer struct {
 	cars []*Car
 
-    carSize float32
+	carSize float32
 
 	obstaclemap *image.Gray
 	heightmap   *image.Gray
@@ -52,7 +51,7 @@ func NewRacer(levelDir string) (*Racer, error) {
 		return nil, err
 	}
 
-    r.carSize = carSize
+	r.carSize = carSize
 
 	if r.spriteForeground, err = NewSprite(filepath.Join(levelDir, "foreground.png"), screenWidth, screenHeight); err != nil {
 		return nil, err
@@ -79,6 +78,9 @@ func (r *Racer) Update(t time.Duration) {
 	if !r.running {
 		return
 	}
+
+	r.HandleCollisions()
+
 	for _, car := range r.cars {
 		car.Update(t)
 	}
@@ -96,14 +98,14 @@ func (r *Racer) Render(screen *sdl.Surface) {
 
 }
 
-func (r *Racer) Join(player *Player) {
+func (r *Racer) Join(player *Player, x, y float32) {
 	if len(r.cars) == 0 {
 		mixer.ResumeMusic()
 		r.music.PlayMusic(-1)
 	}
 	car := NewCar(player, r.spriteCarFG, r.spriteCarBG, r.carSize)
-	car.position.x = 200
-	car.position.y = 200
+	car.position.x = x
+	car.position.y = y
 	r.cars = append(r.cars, car)
 }
 
@@ -164,7 +166,7 @@ func (w *Wheel) CalculateForce(relativeGroundSpeed Vector, tDur time.Duration) V
 
 	forwardVel, forwardMag := velDiff.Project(w.forwardAxis)
 
-	responseForce := sideVel.MulScalar(-2)
+	responseForce := sideVel.MulScalar(-1)
 	responseForce = responseForce.Add(forwardVel.MulScalar(-1))
 
 	w.torque += forwardMag * w.radius
@@ -210,6 +212,9 @@ type Car struct {
 
 	spriteBG *Sprite
 	spriteFG *Sprite
+	size     float32
+	width    float32
+	height   float32
 }
 
 func (car *Car) AddForce(force Vector, relOffset Vector) {
@@ -254,8 +259,6 @@ func (car *Car) Update(time time.Duration) {
 		car.AddForce(worldResponseForce, worldWheelOffset)
 	}
 
-    log.Printf("%f", t)
-
 	acceleration := car.force.DivScalar(car.mass)
 	car.velocity = car.velocity.Add(acceleration.MulScalar(t))
 	car.position = car.position.Add(car.velocity.MulScalar(t))
@@ -290,11 +293,14 @@ func NewCar(owner *Player, spriteFG, spriteBG *Sprite, carSize float32) *Car {
 		mass:            5,
 		inertia:         300,
 		wheels: [2]*Wheel{
-			NewWheel(Vector{0, carSize/2.0}, 4),
-			NewWheel(Vector{0, -carSize/2.0}, 4),
+			NewWheel(Vector{0, carSize / 2.0}, 4),
+			NewWheel(Vector{0, -carSize / 2.0}, 4),
 		},
 		spriteFG: spriteFG,
 		spriteBG: spriteBG,
+		size:     carSize,
+		width:    carSize * 18 / 32.0,
+        height: carSize * 30/32.0,
 	}
 }
 
