@@ -45,6 +45,10 @@ type Game interface {
 	KeyPressed(input sdl.Keysym)
 }
 
+func (p *Player) Vibrate() {
+    binary.Write(p.Conn, binary.BigEndian, uint32(42))
+}
+
 func handleConnection(conn net.Conn) {
 	player := &Player{Conn: conn}
 	defer func() {

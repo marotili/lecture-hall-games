@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"math"
 )
 
@@ -72,7 +71,6 @@ func col(car *Car, car2 *Car) {
         newAngle = (car1Angle + car2Angle)/2.0
     }
 
-    log.Printf("%f, %f, %f", car.angle, car2.angle, newAngle) 
     c1Lines := lines(car, newAngle)
     c2Lines := lines(car2, newAngle)
 
@@ -85,9 +83,7 @@ func col(car *Car, car2 *Car) {
 
     for i, c1Line := range(c1Lines) {
         for j, linePair := range(linePairs) {
-            log.Printf("Line1: %f", c1Line)
             c2Line := linePair[0]
-            log.Printf("Line2: %f", c2Line)
 
             if math.Abs(float64(c1Line[0] - c2Line[0])) < 0.001 {
                 continue
@@ -97,7 +93,6 @@ func col(car *Car, car2 *Car) {
             y1 := c1Line[0]*x1 + c1Line[1]
 
             c2Line = linePair[1]
-            log.Printf("Line2-2: %f", c2Line)
 
             if math.Abs(float64(c1Line[0] - c2Line[0])) < 0.001 {
                 continue
@@ -111,12 +106,9 @@ func col(car *Car, car2 *Car) {
 
             d := math.Sqrt(dx*dx + dy*dy)
 
-            log.Printf("%f, %f, %f, %f, %f, %f, %f", x1, y1, x2, y2, dx, dy, d)
-
-
-            if d < 4{
-                log.Printf("HIT")
-                log.Printf("%d, %d, %f", i, j, d)
+            if d < 2{
+                car.owner.Vibrate()
+                car2.owner.Vibrate()
 
                 carAbs := Vector{(x1 + x2)/2.0, (y1 + y2)/2.0}
                 carRel := carAbs.Sub(car.position)
@@ -143,13 +135,6 @@ func col(car *Car, car2 *Car) {
                 
                 forceOn1 := car2.force
                 forceOn2 := car.force
-
-                log.Printf("%f, %f", x1, y1)
-                log.Printf("%f, %f", x2, y2)
-                log.Printf("%f, %f", forceOn1, forceOn2)
-
-                log.Printf("%f, %f", car.RelativeToWorld(carRel),
-                car2.RelativeToWorld(car2Rel))
 
                 car.AddForce(forceOn1, car.RelativeToWorld(carRel))
                 car2.AddForce(forceOn2, car2.RelativeToWorld(car2Rel))
