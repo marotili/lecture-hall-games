@@ -1,3 +1,6 @@
+// Copyright (c) 2012 by Lecture Hall Games Authors.
+// All source files are distributed under the Simplified BSD License.
+
 package main
 
 import (
@@ -19,21 +22,21 @@ type Vector struct {
 
 func (v Vector) Normalized() Vector {
 	length := float32(math.Sqrt(float64(v.x*v.x + v.y*v.y)))
-    if length == 0 {
-        return Vector{0, 0}
-    }
+	if length == 0 {
+		return Vector{0, 0}
+	}
 	return Vector{v.x / length, v.y / length}
 }
 
 func (v *Vector) Normalize() {
 	length := float32(math.Sqrt(float64(v.x*v.x + v.y*v.y)))
-    if length == 0 {
-        v.x = 0
-        v.y = 0
-    } else {
-        v.x = v.x / length
-        v.y = v.y / length
-    }
+	if length == 0 {
+		v.x = 0
+		v.y = 0
+	} else {
+		v.x = v.x / length
+		v.y = v.y / length
+	}
 }
 
 func (v Vector) Length() float32 {

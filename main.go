@@ -1,3 +1,6 @@
+// Copyright (c) 2012 by Lecture Hall Games Authors.
+// All source files are distributed under the Simplified BSD License.
+
 package main
 
 import (
@@ -46,7 +49,7 @@ type Game interface {
 }
 
 func (p *Player) Vibrate() {
-    binary.Write(p.Conn, binary.BigEndian, uint32(42))
+	binary.Write(p.Conn, binary.BigEndian, uint32(42))
 }
 
 func handleConnection(conn net.Conn) {
@@ -180,7 +183,7 @@ func main() {
 				screen = sdl.SetVideoMode(int(e.W), int(e.H), 32, sdl.RESIZABLE)
 			case sdl.KeyboardEvent:
 				if e.Type == sdl.KEYDOWN {
-				game.KeyPressed(e.Keysym)
+					game.KeyPressed(e.Keysym)
 				}
 			}
 		default:

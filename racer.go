@@ -1,3 +1,6 @@
+// Copyright (c) 2012 by Lecture Hall Games Authors.
+// All source files are distributed under the Simplified BSD License.
+
 package main
 
 import (
@@ -26,7 +29,7 @@ type Racer struct {
 	spriteBackground *Sprite
 	spriteWaiting    *Sprite
 
-	running bool
+	running   bool
 	showNames bool
 
 	music *mixer.Music
@@ -69,7 +72,7 @@ func NewRacer(levelDir string) (*Racer, error) {
 		return nil, errors.New(sdl.GetError())
 	}
 
-		textWaiting := ttf.RenderUTF8_Blended(r.font, "Waiting for other player. Press space to start....", sdl.Color{0, 0, 255, 0})
+	textWaiting := ttf.RenderUTF8_Blended(r.font, "Waiting for other player. Press space to start....", sdl.Color{0, 0, 255, 0})
 	r.spriteWaiting = NewSpriteFromSurface(textWaiting)
 
 	return r, nil
@@ -85,7 +88,7 @@ func (r *Racer) Update(t time.Duration) {
 	for _, car := range r.cars {
 		if car.spriteNick == nil {
 			car.spriteNick = NewSpriteFromSurface(car.nickSurface)
-		}		
+		}
 
 		car.Update(t)
 	}
@@ -99,7 +102,7 @@ func (r *Racer) Render(screen *sdl.Surface) {
 
 		if r.showNames == true {
 			if car.spriteNick != nil {
-				car.spriteNick.Draw(screenWidth/14, screenHeight/128 + float32(16 * i), 0, 0.22, true) 
+				car.spriteNick.Draw(screenWidth/14, screenHeight/128+float32(16*i), 0, 0.22, true)
 			}
 		}
 
@@ -109,7 +112,7 @@ func (r *Racer) Render(screen *sdl.Surface) {
 	r.spriteForeground.Draw(screenWidth/2, screenHeight/2, 0, 1, true)
 
 	if r.running != true {
-		r.spriteWaiting.Draw(screenWidth/2,screenHeight/5,0,1,true)
+		r.spriteWaiting.Draw(screenWidth/2, screenHeight/5, 0, 1, true)
 	}
 }
 
@@ -202,8 +205,8 @@ func valueAt(img *image.Gray, x, y float32) float32 {
 func (r *Racer) KeyPressed(input sdl.Keysym) {
 	if input.Sym == sdl.K_SPACE {
 		r.running = true
-	} 
-	if input.Sym == sdl.K_TAB  && r.running == true {
+	}
+	if input.Sym == sdl.K_TAB && r.running == true {
 		if r.showNames == false {
 			r.showNames = true
 		} else {
@@ -232,12 +235,12 @@ type Car struct {
 
 	wheels [2]*Wheel
 
-	spriteBG *Sprite
-	spriteFG *Sprite
-	size     float32
-	width    float32
-	height   float32
-	spriteNick *Sprite
+	spriteBG    *Sprite
+	spriteFG    *Sprite
+	size        float32
+	width       float32
+	height      float32
+	spriteNick  *Sprite
 	nickSurface *sdl.Surface
 }
 
@@ -303,7 +306,7 @@ func (car *Car) Draw(heightMod float32) {
 }
 
 func NewCar(owner *Player, spriteFG, spriteBG *Sprite, carSize float32, font *ttf.Font) *Car {
-textNick := ttf.RenderUTF8_Blended(font, owner.Nick, sdl.Color{0,0,255,0})
+	textNick := ttf.RenderUTF8_Blended(font, owner.Nick, sdl.Color{0, 0, 255, 0})
 	return &Car{
 		position:        Vector{0, 0},
 		velocity:        Vector{0, 0},
@@ -321,12 +324,12 @@ textNick := ttf.RenderUTF8_Blended(font, owner.Nick, sdl.Color{0,0,255,0})
 			NewWheel(Vector{0, carSize / 2.0}, 4),
 			NewWheel(Vector{0, -carSize / 2.0}, 4),
 		},
-		spriteFG: spriteFG,
-		spriteBG: spriteBG,
-		size:     carSize,
-		width:    carSize * 18 / 32.0,
-        height: carSize * 1,
-		nickSurface:  textNick,
+		spriteFG:    spriteFG,
+		spriteBG:    spriteBG,
+		size:        carSize,
+		width:       carSize * 18 / 32.0,
+		height:      carSize * 1,
+		nickSurface: textNick,
 	}
 }
 
