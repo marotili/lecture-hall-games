@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/binary"
+	"fmt"
 	"github.com/0xe2-0x9a-0x9b/Go-SDL/mixer"
 	"github.com/0xe2-0x9a-0x9b/Go-SDL/sdl"
 	"github.com/0xe2-0x9a-0x9b/Go-SDL/ttf"
@@ -10,13 +11,12 @@ import (
 	"io"
 	"log"
 	"math"
+	"math/rand"
 	"net"
 	"os"
 	"runtime"
 	"sync"
 	"time"
-	"math/rand"
-	"fmt"
 )
 
 const basePkg = "github.com/fruehwirth.marco/lecture-hall-games"
@@ -40,9 +40,13 @@ const (
 type Game interface {
 	Update(t time.Duration)
 	Render(screen *sdl.Surface)
-	Join(player *Player)
+	Join(player *Player, x, y float32)
 	Leave(player *Player)
 	KeyPressed(input sdl.Keysym)
+}
+
+func (p *Player) Vibrate() {
+    binary.Write(p.Conn, binary.BigEndian, uint32(42))
 }
 
 func handleConnection(conn net.Conn) {
@@ -64,7 +68,7 @@ func handleConnection(conn net.Conn) {
 	player.Nick = string(nickBytes)
 
 	mu.Lock()
-	game.Join(player)
+	game.Join(player, 200, 200)
 	mu.Unlock()
 
 	log.Printf("Player %q joined (%s)\n", player.Nick, conn.RemoteAddr())
@@ -141,9 +145,9 @@ func main() {
 	}
 
 	var err error
-	
+
 	rand.Seed(time.Now().UnixNano())
-	levelDir := fmt.Sprintf("data/levels/demolevel%d",3+rand.Intn(numberLevels))
+	levelDir := fmt.Sprintf("data/levels/demolevel%d", 3+rand.Intn(numberLevels))
 	//carsDir := fmt.Sprintf(" data/cars/car%d/", 1+rand.Intn(numberCars))
 	if game, err = NewRacer(levelDir); err != nil {
 		log.Fatal(err)
