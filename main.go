@@ -112,7 +112,7 @@ func main() {
 	if sdl.Init(sdl.INIT_EVERYTHING) != 0 {
 		log.Fatal(sdl.GetError())
 	}
-	var screen = sdl.SetVideoMode(screenWidth, screenHeight, 32, sdl.OPENGL|sdl.HWSURFACE|sdl.GL_DOUBLEBUFFER)
+	var screen = sdl.SetVideoMode(screenWidth, screenHeight, 32, sdl.OPENGL|sdl.HWSURFACE|sdl.GL_DOUBLEBUFFER|sdl.FULLSCREEN)
 	if screen == nil {
 		log.Fatal(sdl.GetError())
 	}
@@ -180,7 +180,11 @@ func main() {
 				screen = sdl.SetVideoMode(int(e.W), int(e.H), 32, sdl.RESIZABLE)
 			case sdl.KeyboardEvent:
 				if e.Type == sdl.KEYDOWN {
-				game.KeyPressed(e.Keysym)
+					if e.Keysym.Sym == sdl.K_ESCAPE {
+						running = false
+					} else {
+						game.KeyPressed(e.Keysym)
+					}
 				}
 			}
 		default:

@@ -13,6 +13,7 @@ Authors
  * Marco Fruhwirth (Development)
  * Christoph Hack (Development)
  * Jakob Unterkofler (Development)
+ * Jörg Müller (Development)
  * Dorian Santner (Graphics)
  * Stefan Putzinger (Music)
 
