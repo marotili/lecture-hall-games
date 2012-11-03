@@ -1,9 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <string name="app_name">LectureRoomGamesController</string>
-    <string name="server">Server:</string>
-    <string name="nickname">Nickname</string>
-    <string name="toController">Connect</string>
-    <string name="title_activity_controller_main">Controller</string>
-
+    <string name="app_name">Lecture Hall Games</string>
+    <string name="label_server">Server:</string>
+    <string name="label_nick">Nick:</string>
+    <string name="edit_server">server address</string>
+    <string name="edit_nick">nick name</string>
+    <string name="button_connect">Connect</string>
 </resources>
