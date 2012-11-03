@@ -53,9 +53,6 @@ func handleConnection(conn net.Conn) {
 		game.Leave(player)
 		mu.Unlock()
 	}()
-	mu.Lock()
-	game.Join(player)
-	mu.Unlock()
 
 	var nickLength uint32
 	binary.Read(conn, binary.BigEndian, &nickLength)
@@ -65,6 +62,11 @@ func handleConnection(conn net.Conn) {
 		return
 	}
 	player.Nick = string(nickBytes)
+
+	mu.Lock()
+	game.Join(player)
+	mu.Unlock()
+
 	log.Printf("Player %q joined (%s)\n", player.Nick, conn.RemoteAddr())
 
 	buf := make([]byte, 12)
@@ -173,8 +175,9 @@ func main() {
 			case sdl.ResizeEvent:
 				screen = sdl.SetVideoMode(int(e.W), int(e.H), 32, sdl.RESIZABLE)
 			case sdl.KeyboardEvent:
-					game.KeyPressed(e.Keysym)
-				
+				if e.Type == sdl.KEYDOWN {
+				game.KeyPressed(e.Keysym)
+				}
 			}
 		default:
 		}

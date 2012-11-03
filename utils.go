@@ -95,7 +95,7 @@ func NewSprite(path string, width, height float32) (*Sprite, error) {
 }
 
 func NewSpriteFromSurface(surface *sdl.Surface) *Sprite {
-	width, height := float32(20), float32(20)
+	width, height := float32(screenWidth*0.6), float32(screenHeight*0.1)
 	img := image.NewRGBA(image.Rect(0, 0, int(surface.W), int(surface.H)))
 	b := img.Bounds()
 	bpp := int(surface.Format.BytesPerPixel)
