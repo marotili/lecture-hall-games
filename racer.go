@@ -85,7 +85,7 @@ func (r *Racer) Update(t time.Duration) {
 			car.spriteNick = NewSpriteFromSurface(car.nickSurface)
 		}		
 
-		car.Update(t,currentColor)
+		car.Update(t)
 	}
 }
 
@@ -255,7 +255,7 @@ func (car *Car) PointVel(offset Vector) Vector {
 	return tangent.MulScalar(car.angularVelocity).Add(car.velocity)
 }
 
-func (car *Car) Update(time time.Duration, currentColor float32) {
+func (car *Car) Update(time time.Duration) {
 	t := float32(time) * timeFactor
 	if car.owner.ButtonA {
 		car.SetThrottle(1, false)
@@ -279,7 +279,7 @@ func (car *Car) Update(time time.Duration, currentColor float32) {
 		car.AddForce(worldResponseForce, worldWheelOffset)
 	}
 
-    //log.Printf("%f", t)
+    log.Printf("%f", t)
 
 	acceleration := car.force.DivScalar(car.mass)
 	car.velocity = car.velocity.Add(acceleration.MulScalar(t))
