@@ -290,8 +290,8 @@ func NewCar(owner *Player, spriteFG, spriteBG *Sprite, carSize float32) *Car {
 		torque:          0,
 		angularVelocity: 0,
 		angle:           0,
-		mass:            3,
-		inertia:         600,
+		mass:            5,
+		inertia:         200,
 		wheels: [2]*Wheel{
 			NewWheel(Vector{0, carSize / 2.0}, 4),
 			NewWheel(Vector{0, -carSize / 2.0}, 4),
@@ -307,7 +307,7 @@ func NewCar(owner *Player, spriteFG, spriteBG *Sprite, carSize float32) *Car {
 var timeFactor float32 = 0.00000001
 
 func (car *Car) Steer(steering float32) {
-	steeringLock := float32(0.75)
+	steeringLock := float32(0.4)
 	car.wheels[1].SetSteeringAngle(-steering * steeringLock)
 }
 
