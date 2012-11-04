@@ -68,11 +68,11 @@ func NewRacer(levelDir string) (*Racer, error) {
 		return nil, errors.New(sdl.GetError())
 	}
 
-	if r.font = ttf.OpenFont("data/font.otf", 72); r.font == nil {
+	if r.font = ttf.OpenFont("data/font.otf", 32); r.font == nil {
 		return nil, errors.New(sdl.GetError())
 	}
 
-	textWaiting := ttf.RenderUTF8_Blended(r.font, "Waiting for other player. Press space to start....", sdl.Color{0, 0, 255, 0})
+	textWaiting := ttf.RenderUTF8_Blended(r.font, "Waiting for other players. Press space to start....", sdl.Color{0, 0, 255, 0})
 	r.spriteWaiting = NewSpriteFromSurface(textWaiting)
 
 	return r, nil
@@ -86,10 +86,6 @@ func (r *Racer) Update(t time.Duration) {
 	r.HandleCollisions()
 
 	for _, car := range r.cars {
-		if car.spriteNick == nil {
-			car.spriteNick = NewSpriteFromSurface(car.nickSurface)
-		}
-
 		car.Update(t)
 	}
 }
@@ -97,16 +93,18 @@ func (r *Racer) Update(t time.Duration) {
 func (r *Racer) Render(screen *sdl.Surface) {
 	r.spriteBackground.Draw(screenWidth/2, screenHeight/2, 0, 1, false)
 
-	for i, car := range r.cars {
-		size := (1 - 0.2*valueAt(r.heightmap, car.position.x, car.position.y))
-
-		if r.showNames == true {
-			if car.spriteNick != nil {
-				car.spriteNick.Draw(screenWidth/14, screenHeight/128+float32(16*i), 0, 0.22, true)
-			}
-		}
-
+	for _, car := range r.cars {
+		size := (1 - 0.3*valueAt(r.heightmap, car.position.x, car.position.y))
 		car.Draw(size)
+	}
+
+	if r.showNames {
+		x := float32(screenWidth) * 0.02
+		y := float32(screenHeight) * 0.02
+		for _, car := range r.cars {
+			car.spriteNick.Draw(x+.25*car.spriteNick.width, y+.25*car.spriteNick.height, 0, .5, true)
+			y += .5 * 1.2 * car.spriteNick.height
+		}
 	}
 
 	r.spriteForeground.Draw(screenWidth/2, screenHeight/2, 0, 1, true)
@@ -206,12 +204,8 @@ func (r *Racer) KeyPressed(input sdl.Keysym) {
 	if input.Sym == sdl.K_SPACE {
 		r.running = true
 	}
-	if input.Sym == sdl.K_TAB && r.running == true {
-		if r.showNames == false {
-			r.showNames = true
-		} else {
-			r.showNames = false
-		}
+	if input.Sym == sdl.K_TAB {
+		r.showNames = !r.showNames
 	}
 }
 
@@ -235,13 +229,12 @@ type Car struct {
 
 	wheels [2]*Wheel
 
-	spriteBG    *Sprite
-	spriteFG    *Sprite
-	size        float32
-	width       float32
-	height      float32
-	spriteNick  *Sprite
-	nickSurface *sdl.Surface
+	spriteBG   *Sprite
+	spriteFG   *Sprite
+	size       float32
+	width      float32
+	height     float32
+	spriteNick *Sprite
 }
 
 func (car *Car) AddForce(force Vector, relOffset Vector) {
@@ -306,7 +299,8 @@ func (car *Car) Draw(heightMod float32) {
 }
 
 func NewCar(owner *Player, spriteFG, spriteBG *Sprite, carSize float32, font *ttf.Font) *Car {
-	textNick := ttf.RenderUTF8_Blended(font, owner.Nick, sdl.Color{0, 0, 255, 0})
+	textNick := ttf.RenderUTF8_Blended(font, owner.Nick, sdl.Color{255, 255, 255, 0})
+	spriteNick := NewSpriteFromSurface(textNick)
 	return &Car{
 		position:        Vector{0, 0},
 		velocity:        Vector{0, 0},
@@ -324,12 +318,12 @@ func NewCar(owner *Player, spriteFG, spriteBG *Sprite, carSize float32, font *tt
 			NewWheel(Vector{0, carSize / 2.0}, 4),
 			NewWheel(Vector{0, -carSize / 2.0}, 4),
 		},
-		spriteFG:    spriteFG,
-		spriteBG:    spriteBG,
-		size:        carSize,
-		width:       carSize * 18 / 32.0,
-		height:      carSize * 1,
-		nickSurface: textNick,
+		spriteFG:   spriteFG,
+		spriteBG:   spriteBG,
+		size:       carSize,
+		width:      carSize * 18 / 32.0,
+		height:     carSize * 1,
+		spriteNick: spriteNick,
 	}
 }
 
