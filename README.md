@@ -2,10 +2,30 @@ Lecture Hall Games
 ==================
 
 Lecture Hall Games is a simple collection of games (currently only the car
-racer game is available) that can be played on any PC with an arbitrary number
-of players. Each player needs to a) be able to see the screen (a video
-projector is preferable) and b) a custom android app that connects over Wifi
-and acts as controller.
+racer game is available) that can be played on a single PC with an arbitrary
+number of players. Each player needs a custom android app that connects over
+Wifi and acts as controller.
+
+
+Quick Start
+-----------
+
+Checkout, build and install the game:
+
+    go get github.com/fruhwirth-marco/lecture-hall-games
+
+Start the game:
+
+    lecture-hall-games
+
+Install the Android client (controller) on your mobile phone or tablet:
+
+http://www.tux21b.org/public/LectureHallGamesController.apk
+
+Start the controller, enter the IP address of the server and enjoy the game.
+
+![screen](/fruhwirth-marco/lecture-hall-games/raw/master/artwork/screen01.png)
+
 
 Authors
 -------
@@ -16,6 +36,7 @@ Authors
  * Jörg Müller (Development)
  * Dorian Santner (Graphics)
  * Stefan Putzinger (Music)
+
 
 License
 -------

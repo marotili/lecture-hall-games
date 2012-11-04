@@ -1,3 +1,6 @@
+// Copyright (c) 2012 by Lecture Hall Games Authors.
+// All source files are distributed under the Simplified BSD License.
+
 package main
 
 import (
@@ -19,21 +22,21 @@ type Vector struct {
 
 func (v Vector) Normalized() Vector {
 	length := float32(math.Sqrt(float64(v.x*v.x + v.y*v.y)))
-    if length == 0 {
-        return Vector{0, 0}
-    }
+	if length == 0 {
+		return Vector{0, 0}
+	}
 	return Vector{v.x / length, v.y / length}
 }
 
 func (v *Vector) Normalize() {
 	length := float32(math.Sqrt(float64(v.x*v.x + v.y*v.y)))
-    if length == 0 {
-        v.x = 0
-        v.y = 0
-    } else {
-        v.x = v.x / length
-        v.y = v.y / length
-    }
+	if length == 0 {
+		v.x = 0
+		v.y = 0
+	} else {
+		v.x = v.x / length
+		v.y = v.y / length
+	}
 }
 
 func (v Vector) Length() float32 {
@@ -107,7 +110,6 @@ func NewSprite(path string, width, height float32) (*Sprite, error) {
 }
 
 func NewSpriteFromSurface(surface *sdl.Surface) *Sprite {
-	width, height := float32(screenWidth*0.6), float32(screenHeight*0.1)
 	img := image.NewRGBA(image.Rect(0, 0, int(surface.W), int(surface.H)))
 	b := img.Bounds()
 	bpp := int(surface.Format.BytesPerPixel)
@@ -121,7 +123,7 @@ func NewSpriteFromSurface(surface *sdl.Surface) *Sprite {
 		}
 	}
 	tex := uploadTexture(img)
-	return &Sprite{img, tex, width, height}
+	return &Sprite{img, tex, float32(b.Max.X), float32(b.Max.Y)}
 }
 
 func (s *Sprite) Draw(x, y, angle, scale float32, blend bool) {

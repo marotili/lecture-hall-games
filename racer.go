@@ -1,3 +1,6 @@
+// Copyright (c) 2012 by Lecture Hall Games Authors.
+// All source files are distributed under the Simplified BSD License.
+
 package main
 
 import (
@@ -26,7 +29,7 @@ type Racer struct {
 	spriteBackground *Sprite
 	spriteWaiting    *Sprite
 
-	running bool
+	running   bool
 	showNames bool
 
 	music *mixer.Music
@@ -65,11 +68,11 @@ func NewRacer(levelDir string) (*Racer, error) {
 		return nil, errors.New(sdl.GetError())
 	}
 
-	if r.font = ttf.OpenFont("data/font.otf", 72); r.font == nil {
+	if r.font = ttf.OpenFont("data/font.otf", 32); r.font == nil {
 		return nil, errors.New(sdl.GetError())
 	}
 
-		textWaiting := ttf.RenderUTF8_Blended(r.font, "Waiting for other player. Press space to start....", sdl.Color{0, 0, 255, 0})
+	textWaiting := ttf.RenderUTF8_Blended(r.font, "Waiting for other players. Press space to start....", sdl.Color{0, 0, 255, 0})
 	r.spriteWaiting = NewSpriteFromSurface(textWaiting)
 
 	return r, nil
@@ -83,33 +86,31 @@ func (r *Racer) Update(t time.Duration) {
 	r.HandleCollisions()
 
 	for _, car := range r.cars {
-		if car.spriteNick == nil {
-			car.spriteNick = NewSpriteFromSurface(car.nickSurface)
-		}		
-
-		car.Update(t)
+		car.Update(t, r)
 	}
 }
 
 func (r *Racer) Render(screen *sdl.Surface) {
 	r.spriteBackground.Draw(screenWidth/2, screenHeight/2, 0, 1, false)
 
-	for i, car := range r.cars {
-		size := (1 - 0.2*valueAt(r.heightmap, car.position.x, car.position.y))
-
-		if r.showNames == true {
-			if car.spriteNick != nil {
-				car.spriteNick.Draw(screenWidth/14, screenHeight/128 + float32(16 * i), 0, 0.22, true) 
-			}
-		}
-
+	for _, car := range r.cars {
+		size := (1 - 0.3*valueAt(r.heightmap, car.position.x, car.position.y))
 		car.Draw(size)
+	}
+
+	if r.showNames {
+		x := float32(screenWidth) * 0.02
+		y := float32(screenHeight) * 0.02
+		for _, car := range r.cars {
+			car.spriteNick.Draw(x+.25*car.spriteNick.width, y+.25*car.spriteNick.height, 0, .5, true)
+			y += .5 * 1.2 * car.spriteNick.height
+		}
 	}
 
 	r.spriteForeground.Draw(screenWidth/2, screenHeight/2, 0, 1, true)
 
 	if r.running != true {
-		r.spriteWaiting.Draw(screenWidth/2,screenHeight/5,0,1,true)
+		r.spriteWaiting.Draw(screenWidth/2, screenHeight/5, 0, 1, true)
 	}
 }
 
@@ -202,13 +203,9 @@ func valueAt(img *image.Gray, x, y float32) float32 {
 func (r *Racer) KeyPressed(input sdl.Keysym) {
 	if input.Sym == sdl.K_SPACE {
 		r.running = true
-	} 
-	if input.Sym == sdl.K_TAB  && r.running == true {
-		if r.showNames == false {
-			r.showNames = true
-		} else {
-			r.showNames = false
-		}
+	}
+	if input.Sym == sdl.K_TAB {
+		r.showNames = !r.showNames
 	}
 }
 
@@ -232,13 +229,12 @@ type Car struct {
 
 	wheels [2]*Wheel
 
-	spriteBG *Sprite
-	spriteFG *Sprite
-	size     float32
-	width    float32
-	height   float32
+	spriteBG   *Sprite
+	spriteFG   *Sprite
+	size       float32
+	width      float32
+	height     float32
 	spriteNick *Sprite
-	nickSurface *sdl.Surface
 }
 
 func (car *Car) AddForce(force Vector, relOffset Vector) {
@@ -259,7 +255,7 @@ func (car *Car) PointVel(offset Vector) Vector {
 	return tangent.MulScalar(car.angularVelocity).Add(car.velocity)
 }
 
-func (car *Car) Update(time time.Duration) {
+func (car *Car) Update(time time.Duration, r *Racer) {
 	t := float32(time) * timeFactor
 	if car.owner.ButtonA {
 		car.SetThrottle(1, false)
@@ -272,7 +268,11 @@ func (car *Car) Update(time time.Duration) {
 		car.SetBrakes(0)
 	}
 
-	car.Steer(car.owner.JoystickX)
+	steer := car.owner.JoystickX
+	if !car.owner.ButtonA {
+		steer *= 1.1
+	}
+	car.Steer(steer)
 	for _, wheel := range car.wheels {
 		worldWheelOffset := car.RelativeToWorld(wheel.position)
 		worldWheelGroundVel := car.PointVel(worldWheelOffset)
@@ -282,6 +282,18 @@ func (car *Car) Update(time time.Duration) {
 
 		car.AddForce(worldResponseForce, worldWheelOffset)
 	}
+
+	const cRolling = 12.8 * .2
+	const cDrag = 0.4257 * .3
+
+	fDrag := car.velocity.MulScalar(-cDrag * car.velocity.Length())
+	fRolling := car.velocity.MulScalar(-cRolling)
+
+	terrain := (1 - valueAt(r.obstaclemap, car.position.x, car.position.y)) * 6
+	fRolling = fRolling.MulScalar(terrain)
+
+	car.AddForce(fDrag, Vector{0, 0})
+	car.AddForce(fRolling, Vector{0, 0})
 
 	acceleration := car.force.DivScalar(car.mass)
 	car.velocity = car.velocity.Add(acceleration.MulScalar(t))
@@ -303,7 +315,8 @@ func (car *Car) Draw(heightMod float32) {
 }
 
 func NewCar(owner *Player, spriteFG, spriteBG *Sprite, carSize float32, font *ttf.Font) *Car {
-textNick := ttf.RenderUTF8_Blended(font, owner.Nick, sdl.Color{0,0,255,0})
+	textNick := ttf.RenderUTF8_Blended(font, owner.Nick, sdl.Color{255, 255, 255, 0})
+	spriteNick := NewSpriteFromSurface(textNick)
 	return &Car{
 		position:        Vector{0, 0},
 		velocity:        Vector{0, 0},
@@ -321,24 +334,24 @@ textNick := ttf.RenderUTF8_Blended(font, owner.Nick, sdl.Color{0,0,255,0})
 			NewWheel(Vector{0, carSize / 2.0}, 4),
 			NewWheel(Vector{0, -carSize / 2.0}, 4),
 		},
-		spriteFG: spriteFG,
-		spriteBG: spriteBG,
-		size:     carSize,
-		width:    carSize * 18 / 32.0,
-        height: carSize * 1,
-		nickSurface:  textNick,
+		spriteFG:   spriteFG,
+		spriteBG:   spriteBG,
+		size:       carSize,
+		width:      carSize * 18 / 32.0,
+		height:     carSize * 1,
+		spriteNick: spriteNick,
 	}
 }
 
 var timeFactor float32 = 0.00000001
 
 func (car *Car) Steer(steering float32) {
-	steeringLock := float32(0.4)
+	steeringLock := float32(0.5)
 	car.wheels[1].SetSteeringAngle(-steering * steeringLock)
 }
 
 func (car *Car) SetThrottle(throttle float32, allWheel bool) {
-	torque := float32(4)
+	torque := float32(100)
 
 	if allWheel {
 		car.wheels[1].AddTransmissionTorque(throttle * torque)
