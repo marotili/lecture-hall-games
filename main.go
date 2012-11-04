@@ -22,7 +22,7 @@ import (
 	"time"
 )
 
-const basePkg = "github.com/fruehwirth.marco/lecture-hall-games"
+const basePkg = "github.com/fruhwirth-marco/lecture-hall-games"
 const numberLevels = 2
 const numberCars = 1
 
