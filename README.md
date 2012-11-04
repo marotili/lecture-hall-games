@@ -24,6 +24,8 @@ http://www.tux21b.org/public/LectureHallGamesController.apk
 
 Start the controller, enter the IP address of the server and enjoy the game.
 
+![screen](/fruhwirth-marco/lecture-hall-games/raw/master/artwork/screen01.png)
+
 
 Authors
 -------
