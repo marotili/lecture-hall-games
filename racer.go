@@ -86,7 +86,7 @@ func (r *Racer) Update(t time.Duration) {
 	r.HandleCollisions()
 
 	for _, car := range r.cars {
-		car.Update(t)
+		car.Update(t, r)
 	}
 }
 
@@ -255,7 +255,7 @@ func (car *Car) PointVel(offset Vector) Vector {
 	return tangent.MulScalar(car.angularVelocity).Add(car.velocity)
 }
 
-func (car *Car) Update(time time.Duration) {
+func (car *Car) Update(time time.Duration, r *Racer) {
 	t := float32(time) * timeFactor
 	if car.owner.ButtonA {
 		car.SetThrottle(1, false)
@@ -268,7 +268,11 @@ func (car *Car) Update(time time.Duration) {
 		car.SetBrakes(0)
 	}
 
-	car.Steer(car.owner.JoystickX)
+	steer := car.owner.JoystickX
+	if !car.owner.ButtonA {
+		steer *= 1.1
+	}
+	car.Steer(steer)
 	for _, wheel := range car.wheels {
 		worldWheelOffset := car.RelativeToWorld(wheel.position)
 		worldWheelGroundVel := car.PointVel(worldWheelOffset)
@@ -278,6 +282,18 @@ func (car *Car) Update(time time.Duration) {
 
 		car.AddForce(worldResponseForce, worldWheelOffset)
 	}
+
+	const cRolling = 12.8 * .2
+	const cDrag = 0.4257 * .3
+
+	fDrag := car.velocity.MulScalar(-cDrag * car.velocity.Length())
+	fRolling := car.velocity.MulScalar(-cRolling)
+
+	terrain := (1 - valueAt(r.obstaclemap, car.position.x, car.position.y)) * 6
+	fRolling = fRolling.MulScalar(terrain)
+
+	car.AddForce(fDrag, Vector{0, 0})
+	car.AddForce(fRolling, Vector{0, 0})
 
 	acceleration := car.force.DivScalar(car.mass)
 	car.velocity = car.velocity.Add(acceleration.MulScalar(t))
@@ -330,12 +346,12 @@ func NewCar(owner *Player, spriteFG, spriteBG *Sprite, carSize float32, font *tt
 var timeFactor float32 = 0.00000001
 
 func (car *Car) Steer(steering float32) {
-	steeringLock := float32(0.4)
+	steeringLock := float32(0.5)
 	car.wheels[1].SetSteeringAngle(-steering * steeringLock)
 }
 
 func (car *Car) SetThrottle(throttle float32, allWheel bool) {
-	torque := float32(4)
+	torque := float32(100)
 
 	if allWheel {
 		car.wheels[1].AddTransmissionTorque(throttle * torque)
