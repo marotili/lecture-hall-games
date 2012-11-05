@@ -183,7 +183,11 @@ func main() {
 				screen = sdl.SetVideoMode(int(e.W), int(e.H), 32, sdl.RESIZABLE)
 			case sdl.KeyboardEvent:
 				if e.Type == sdl.KEYDOWN {
-					game.KeyPressed(e.Keysym)
+					if(e.Keysym.Sym == sdl.K_ESCAPE) {
+						running = false;
+					} else {
+						game.KeyPressed(e.Keysym)
+					}
 				}
 			}
 		default:
